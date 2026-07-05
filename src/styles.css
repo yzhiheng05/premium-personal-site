@@ -679,6 +679,49 @@ h3 {
   font-weight: 400;
 }
 
+.translation-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.translation-summary div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.translation-summary strong {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  font-weight: 400;
+}
+
+.translation-summary span,
+.missing-translations span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.missing-translations {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.missing-translations p,
+.translation-complete {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
 .editor-block {
   padding: 22px;
 }
@@ -870,6 +913,7 @@ select:focus {
   .service-list,
   .media-grid,
   .metrics,
+  .translation-summary,
   .dashboard,
   .count-grid {
     grid-template-columns: 1fr;

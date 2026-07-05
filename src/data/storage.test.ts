@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { localizeSiteData } from "../i18n";
+import { getChineseTranslationCoverage, localizeSiteData } from "../i18n";
 import { defaultSite } from "./defaultSite";
 import {
   STORAGE_KEY,
@@ -69,6 +69,41 @@ describe("site storage", () => {
     const localized = localizeSiteData(parsed, "zh");
 
     expect(localized.profile.name).toBe("Custom Person");
+  });
+
+  it("reports Chinese translation coverage for editable content", () => {
+    const data = cloneDefaultSite();
+
+    const coverage = getChineseTranslationCoverage(data);
+
+    expect(coverage.total).toBeGreaterThan(0);
+    expect(coverage.completed).toBe(coverage.total);
+    expect(coverage.missing).toEqual([]);
+  });
+
+  it("reports missing Chinese translations for newly added content", () => {
+    const data = cloneDefaultSite();
+    data.projects.push({
+      id: "p-new",
+      title: "New Project",
+      category: "Advisory",
+      description: "A new body of work.",
+      status: "Draft",
+      year: "2026",
+      link: "https://example.com/new",
+      featured: false,
+      visible: true,
+    });
+
+    const coverage = getChineseTranslationCoverage(data);
+
+    expect(coverage.missing).toEqual([
+      "projects.p-new.title",
+      "projects.p-new.category",
+      "projects.p-new.description",
+      "projects.p-new.status",
+    ]);
+    expect(coverage.completed).toBe(coverage.total - 4);
   });
 
   it("rejects invalid import JSON", () => {

@@ -14,6 +14,7 @@ import type {
   WritingItem,
 } from "../../types";
 import { exportSiteData, parseSiteJson } from "../../data/storage";
+import { getChineseTranslationCoverage } from "../../i18n";
 import { Button, EditorBlock, Field, Select, TextArea, TextInput, Toggle } from "../ui";
 
 type UpdateSite = (updater: (data: SiteData) => SiteData) => void;
@@ -138,6 +139,7 @@ export function TranslationEditor({
   data: SiteData;
   updateSite: UpdateSite;
 }) {
+  const coverage = getChineseTranslationCoverage(data);
   const updateTranslation = (path: string, value: string) =>
     updateSite((current) => ({
       ...current,
@@ -153,6 +155,31 @@ export function TranslationEditor({
 
   return (
     <div className="stack">
+      <EditorBlock title="中文翻译进度">
+        <div className="translation-summary">
+          <div>
+            <strong>{coverage.completed}</strong>
+            <span>已填写</span>
+          </div>
+          <div>
+            <strong>{coverage.total}</strong>
+            <span>总字段</span>
+          </div>
+          <div>
+            <strong>{coverage.missing.length}</strong>
+            <span>缺失项</span>
+          </div>
+        </div>
+        {coverage.missing.length ? (
+          <div className="missing-translations">
+            <span>缺失路径</span>
+            <p>{coverage.missing.join(", ")}</p>
+          </div>
+        ) : (
+          <p className="translation-complete">当前中文内容已覆盖所有可编辑字段。</p>
+        )}
+      </EditorBlock>
+
       <EditorBlock title="个人资料中文">
         <div className="form-grid">
           <TranslationInput

@@ -126,6 +126,61 @@ export function normalizeLanguage(language: Language | undefined): Language {
   return language === "en" ? "en" : "zh";
 }
 
+export interface TranslationCoverage {
+  total: number;
+  completed: number;
+  missing: string[];
+}
+
+export function getChineseTranslationPaths(data: SiteData): string[] {
+  return [
+    "profile.name",
+    "profile.role",
+    "profile.location",
+    "profile.availability",
+    "profile.tagline",
+    "profile.biography",
+    ...data.sections.map((section) => `sections.${section.id}.title`),
+    ...data.links.map((link) => `links.${link.id}.label`),
+    ...data.projects.flatMap((project) => [
+      `projects.${project.id}.title`,
+      `projects.${project.id}.category`,
+      `projects.${project.id}.description`,
+      `projects.${project.id}.status`,
+    ]),
+    ...data.experience.flatMap((item) => [
+      `experience.${item.id}.organization`,
+      `experience.${item.id}.role`,
+      `experience.${item.id}.highlights`,
+      `experience.${item.id}.description`,
+    ]),
+    ...data.writing.flatMap((item) => [
+      `writing.${item.id}.title`,
+      `writing.${item.id}.tag`,
+      `writing.${item.id}.summary`,
+    ]),
+    ...data.media.flatMap((item) => [`media.${item.id}.title`, `media.${item.id}.caption`]),
+    ...data.services.flatMap((service) => [
+      `services.${service.id}.title`,
+      `services.${service.id}.description`,
+    ]),
+    "seo.title",
+    "seo.description",
+    "seo.keywords",
+  ];
+}
+
+export function getChineseTranslationCoverage(data: SiteData): TranslationCoverage {
+  const paths = getChineseTranslationPaths(data);
+  const missing = paths.filter((path) => !data.translations?.zh[path]?.trim());
+
+  return {
+    total: paths.length,
+    completed: paths.length - missing.length,
+    missing,
+  };
+}
+
 function translationFor(
   data: SiteData,
   path: string,
