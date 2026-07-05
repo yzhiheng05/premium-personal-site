@@ -83,8 +83,8 @@ const editorCopy = {
     importFailed: "Import failed.",
     englishContent: "English",
     chineseContent: "Chinese",
-    translateToChinese: "EN to Chinese",
-    translateToEnglish: "Chinese to EN",
+    translateToChinese: "Bing EN to ZH",
+    translateToEnglish: "Bing ZH to EN",
     translating: "Translating...",
     translateEmpty: "Add source text first.",
     translateFailed: "Translation failed. Please try again or edit manually.",
@@ -167,8 +167,8 @@ const editorCopy = {
     importFailed: "导入失败。",
     englishContent: "英文",
     chineseContent: "中文",
-    translateToChinese: "英译中",
-    translateToEnglish: "中译英",
+    translateToChinese: "Bing 英译中",
+    translateToEnglish: "Bing 中译英",
     translating: "正在翻译...",
     translateEmpty: "请先填写要翻译的内容。",
     translateFailed: "翻译失败，请稍后重试或手动编辑。",
@@ -376,29 +376,63 @@ function chineseValue(data: SiteData, path: string): string {
   return data.translations?.zh[path] ?? "";
 }
 
-async function translateText(text: string, source: "en" | "zh-CN", target: "en" | "zh-CN") {
-  const params = new URLSearchParams({
-    client: "gtx",
-    sl: source,
-    tl: target,
-    dt: "t",
-    q: text,
-  });
-  const response = await fetch(`https://translate.googleapis.com/translate_a/single?${params.toString()}`);
+let bingTranslateAuth: { token: string; expiresAt: number } | null = null;
+
+async function getBingTranslateAuthToken() {
+  if (bingTranslateAuth && bingTranslateAuth.expiresAt > Date.now()) {
+    return bingTranslateAuth.token;
+  }
+
+  const response = await fetch("https://edge.microsoft.com/translate/auth");
 
   if (!response.ok) {
-    throw new Error("Translation request failed.");
+    throw new Error("Bing translation auth failed.");
+  }
+
+  const token = (await response.text()).trim();
+  if (!token) {
+    throw new Error("Bing translation auth token was empty.");
+  }
+
+  bingTranslateAuth = {
+    token,
+    expiresAt: Date.now() + 8 * 60 * 1000,
+  };
+
+  return token;
+}
+
+async function translateText(text: string, source: "en" | "zh-Hans", target: "en" | "zh-Hans") {
+  const token = await getBingTranslateAuthToken();
+  const params = new URLSearchParams({
+    "api-version": "3.0",
+    from: source,
+    to: target,
+  });
+  const response = await fetch(`https://api-edge.cognitive.microsofttranslator.com/translate?${params.toString()}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify([{ Text: text }]),
+  });
+
+  if (!response.ok) {
+    bingTranslateAuth = null;
+    throw new Error("Bing translation request failed.");
   }
 
   const payload = (await response.json()) as unknown;
-  if (!Array.isArray(payload) || !Array.isArray(payload[0])) {
-    throw new Error("Translation response was not valid.");
-  }
-
-  const translated = payload[0]
-    .map((segment) => (Array.isArray(segment) && typeof segment[0] === "string" ? segment[0] : ""))
-    .join("")
-    .trim();
+  const translated =
+    Array.isArray(payload) &&
+    typeof payload[0] === "object" &&
+    payload[0] !== null &&
+    "translations" in payload[0] &&
+    Array.isArray(payload[0].translations) &&
+    typeof payload[0].translations[0]?.text === "string"
+      ? payload[0].translations[0].text.trim()
+      : "";
 
   if (!translated) {
     throw new Error("Translation response was empty.");
@@ -618,8 +652,8 @@ function BilingualField({
     try {
       const translated = await translateText(
         trimmed,
-        direction === "toChinese" ? "en" : "zh-CN",
-        direction === "toChinese" ? "zh-CN" : "en",
+        direction === "toChinese" ? "en" : "zh-Hans",
+        direction === "toChinese" ? "zh-Hans" : "en",
       );
 
       if (direction === "toChinese") {

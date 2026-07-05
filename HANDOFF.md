@@ -18,7 +18,7 @@ Recent focus:
 - It was changed to support Chinese and English switching.
 - The user asked whether translation is online/free automatic translation or stored in-project.
 - Current implementation uses stored in-project bilingual content, not online translation.
-- Editable bilingual content is now edited side by side in the normal content tabs. Each bilingual field has optional Google Translate assist buttons for English-to-Chinese and Chinese-to-English drafts. The `翻译检查 / Translation Check` tab only reports Chinese coverage and missing translation paths.
+- Editable bilingual content is now edited side by side in the normal content tabs. Each bilingual field has optional Bing/Microsoft translation assist buttons for English-to-Chinese and Chinese-to-English drafts. The `翻译检查 / Translation Check` tab only reports Chinese coverage and missing translation paths.
 
 ## Current Behavior
 
@@ -68,7 +68,7 @@ Main files:
 - `src/components/admin/editors.tsx`
   - Contains bilingual field editors for language-specific content.
   - English/base values and Chinese translation values are edited side by side in the normal content tabs.
-  - Bilingual fields include optional one-click Google Translate assist; translated output is only a draft and remains manually editable.
+  - Bilingual fields include optional one-click Bing/Microsoft translation assist; translated output is only a draft and remains manually editable.
   - Shared fields such as dates, URLs, visibility, ordering, media type, theme, and accent remain single-value fields.
   - Contains `TranslationEditor` for coverage reporting only.
 
@@ -92,7 +92,7 @@ For long text such as personal evaluations, biographies, or blog summaries:
 
 - Write/edit English and Chinese side by side in the relevant content tab.
 - Use `翻译检查 / Translation Check` to find missing Chinese fields.
-- Optional translation assist calls the public Google Translate endpoint directly from the browser when the user clicks a translate button.
+- Optional translation assist calls Microsoft Edge/Bing translation endpoints directly from the browser when the user clicks a translate button.
 - Translation is not automatic and does not force paired names or text to match.
 
 This keeps manual control as the source of truth while making first drafts faster. If the user later wants production-grade translation, replace the public browser call with a deliberate provider choice, backend proxy, cost handling, and review-before-save behavior.
