@@ -105,6 +105,28 @@ button {
   font-size: 0.82rem;
 }
 
+.topbar-tools {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.language-toggle {
+  min-width: 46px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.language-toggle:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
 .section {
   padding: 96px 0;
 }

@@ -175,6 +175,7 @@ export const defaultSite: SiteData = {
     accent: "#9f7a4f",
     density: "calm",
     motion: "full",
+    language: "zh",
   },
   seo: {
     title: "Avery Stone | Independent Systems Designer",

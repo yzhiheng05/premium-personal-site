@@ -1,5 +1,6 @@
 import { BarChart3, Eye, Lock, LogOut, Save, Settings2, X } from "lucide-react";
-import type { SiteData } from "../../types";
+import type { Language, SiteData } from "../../types";
+import { adminCopy, adminTabs } from "../../i18n";
 import { Button } from "../ui";
 import {
   AppearanceEditor,
@@ -29,23 +30,24 @@ type Tab =
   | "seo"
   | "data";
 
-const tabs: Array<{ id: Tab; label: string }> = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "profile", label: "Profile" },
-  { id: "sections", label: "Sections" },
-  { id: "projects", label: "Projects" },
-  { id: "experience", label: "Experience" },
-  { id: "writing", label: "Writing" },
-  { id: "media", label: "Media" },
-  { id: "services", label: "Services" },
-  { id: "links", label: "Links" },
-  { id: "appearance", label: "Appearance" },
-  { id: "seo", label: "SEO" },
-  { id: "data", label: "Data" },
+const tabs: Tab[] = [
+  "dashboard",
+  "profile",
+  "sections",
+  "projects",
+  "experience",
+  "writing",
+  "media",
+  "services",
+  "links",
+  "appearance",
+  "seo",
+  "data",
 ];
 
 interface AdminPanelProps {
   data: SiteData;
+  language: Language;
   tab: Tab;
   onTabChange: (tab: Tab) => void;
   updateSite: (updater: (data: SiteData) => SiteData) => void;
@@ -57,6 +59,7 @@ interface AdminPanelProps {
 
 export function AdminPanel({
   data,
+  language,
   tab,
   onTabChange,
   updateSite,
@@ -65,48 +68,53 @@ export function AdminPanel({
   onClose,
   onLogout,
 }: AdminPanelProps) {
+  const copy = adminCopy[language];
+  const tabLabels = adminTabs[language];
+
   return (
-    <aside className="admin-panel" aria-label="Studio Console">
+    <aside className="admin-panel" aria-label={copy.studio}>
       <div className="admin-sidebar">
         <div className="admin-brand">
           <Settings2 size={18} />
           <div>
-            <strong>Studio Console</strong>
-            <span>Single-site control</span>
+            <strong>{copy.studio}</strong>
+            <span>{copy.control}</span>
           </div>
         </div>
         <nav className="admin-tabs">
           {tabs.map((item) => (
             <button
-              className={tab === item.id ? "active" : ""}
+              className={tab === item ? "active" : ""}
               type="button"
-              onClick={() => onTabChange(item.id)}
-              key={item.id}
+              onClick={() => onTabChange(item)}
+              key={item}
             >
-              {item.label}
+              {tabLabels[item]}
             </button>
           ))}
         </nav>
         <div className="admin-sidebar-actions">
           <Button onClick={onClose}>
-            <Eye size={15} /> Preview
+            <Eye size={15} /> {copy.preview}
           </Button>
           <Button onClick={onLogout}>
-            <LogOut size={15} /> Logout
+            <LogOut size={15} /> {copy.logout}
           </Button>
         </div>
       </div>
       <div className="admin-content">
         <header className="admin-content-head">
           <div>
-            <p>Editing {data.profile.name}</p>
-            <h2>{tabs.find((item) => item.id === tab)?.label}</h2>
+            <p>
+              {copy.editing} {data.profile.name}
+            </p>
+            <h2>{tabLabels[tab]}</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Close admin">
+          <button className="icon-button" type="button" onClick={onClose} aria-label={copy.closeAdmin}>
             <X size={18} />
           </button>
         </header>
-        {tab === "dashboard" ? <Dashboard data={data} /> : null}
+        {tab === "dashboard" ? <Dashboard data={data} language={language} /> : null}
         {tab === "profile" ? <ProfileEditor profile={data.profile} updateSite={updateSite} /> : null}
         {tab === "sections" ? <SectionsEditor sections={data.sections} updateSite={updateSite} /> : null}
         {tab === "projects" ? <ProjectsEditor projects={data.projects} updateSite={updateSite} /> : null}
@@ -118,7 +126,7 @@ export function AdminPanel({
         {tab === "services" ? <ServicesEditor services={data.services} updateSite={updateSite} /> : null}
         {tab === "links" ? <LinksEditor links={data.links} updateSite={updateSite} /> : null}
         {tab === "appearance" ? (
-          <AppearanceEditor appearance={data.appearance} updateSite={updateSite} />
+          <AppearanceEditor appearance={data.appearance} updateSite={updateSite} language={language} />
         ) : null}
         {tab === "seo" ? <SeoEditor seo={data.seo} updateSite={updateSite} /> : null}
         {tab === "data" ? <DataEditor data={data} onImport={onImport} onReset={onReset} /> : null}
@@ -127,36 +135,37 @@ export function AdminPanel({
   );
 }
 
-function Dashboard({ data }: { data: SiteData }) {
+function Dashboard({ data, language }: { data: SiteData; language: Language }) {
+  const copy = adminCopy[language];
   const visibleSections = data.sections.filter((section) => section.visible).length;
   const counts = [
-    ["Visible sections", visibleSections],
-    ["Projects", data.projects.length],
-    ["Writing", data.writing.length],
-    ["Media", data.media.length],
-    ["Services", data.services.length],
+    [language === "zh" ? "可见模块" : "Visible sections", visibleSections],
+    [adminTabs[language].projects, data.projects.length],
+    [adminTabs[language].writing, data.writing.length],
+    [adminTabs[language].media, data.media.length],
+    [adminTabs[language].services, data.services.length],
   ];
 
   return (
     <div className="dashboard">
       <section className="status-card">
         <div>
-          <p>Site status</p>
-          <h3>Draft changes save locally</h3>
+          <p>{copy.siteStatus}</p>
+          <h3>{copy.draftSaved}</h3>
         </div>
         <Save size={22} />
       </section>
       <section className="status-card">
         <div>
-          <p>Security</p>
-          <h3>Password gate active</h3>
+          <p>{copy.security}</p>
+          <h3>{copy.passwordGate}</h3>
         </div>
         <Lock size={22} />
       </section>
       <section className="status-card">
         <div>
-          <p>Last save</p>
-          <h3>{data.admin.lastSavedAt || "Not saved yet"}</h3>
+          <p>{copy.lastSave}</p>
+          <h3>{data.admin.lastSavedAt || copy.notSaved}</h3>
         </div>
         <BarChart3 size={22} />
       </section>

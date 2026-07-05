@@ -1,10 +1,22 @@
 import { defaultSite } from "./defaultSite";
 import type { SiteData } from "../types";
+import { normalizeLanguage } from "../i18n";
 
 export const STORAGE_KEY = "premium-personal-site:v1";
 
 export function cloneDefaultSite(): SiteData {
   return structuredClone(defaultSite);
+}
+
+function normalizeSiteData(data: SiteData): SiteData {
+  return {
+    ...data,
+    appearance: {
+      ...defaultSite.appearance,
+      ...data.appearance,
+      language: normalizeLanguage(data.appearance.language),
+    },
+  };
 }
 
 function hasObjectShape(value: unknown): value is Record<string, unknown> {
@@ -61,13 +73,13 @@ export function parseSiteJson(text: string): SiteData {
     throw new Error("Import failed: this file is not compatible site data.");
   }
 
-  return {
+  return normalizeSiteData({
     ...parsed,
     admin: {
       ...parsed.admin,
       lastSavedAt: new Date().toISOString(),
     },
-  };
+  });
 }
 
 export function exportSiteData(data: SiteData): string {
@@ -86,13 +98,13 @@ export function loadSiteData(storage: Storage = window.localStorage): SiteData {
 }
 
 export function saveSiteData(data: SiteData, storage: Storage = window.localStorage): SiteData {
-  const next = {
+  const next = normalizeSiteData({
     ...data,
     admin: {
       ...data.admin,
       lastSavedAt: new Date().toISOString(),
     },
-  };
+  });
   storage.setItem(STORAGE_KEY, exportSiteData(next));
   return next;
 }

@@ -21,6 +21,7 @@ describe("site storage", () => {
   it("loads defaults when local storage is empty", () => {
     const data = loadSiteData(storage);
     expect(data.profile.name).toBe(defaultSite.profile.name);
+    expect(data.appearance.language).toBe("zh");
     expect(data.projects.length).toBeGreaterThan(0);
   });
 
@@ -41,6 +42,15 @@ describe("site storage", () => {
 
     expect(isSiteData(parsed)).toBe(true);
     expect(parsed.profile.role).toBe(defaultSite.profile.role);
+  });
+
+  it("normalizes older site data without a language setting", () => {
+    const legacyData = cloneDefaultSite() as unknown as { appearance: Record<string, unknown> };
+    delete legacyData.appearance.language;
+
+    const parsed = parseSiteJson(JSON.stringify(legacyData));
+
+    expect(parsed.appearance.language).toBe("zh");
   });
 
   it("rejects invalid import JSON", () => {

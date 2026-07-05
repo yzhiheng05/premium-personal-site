@@ -1,6 +1,6 @@
 # Premium Personal Site
 
-A premium personal brand website with a hidden password-protected admin console for managing one site's content, sections, appearance, metadata, and JSON import/export.
+A premium bilingual personal brand website with a hidden password-protected admin console for managing one site's content, sections, appearance, metadata, and JSON import/export.
 
 ## Run Locally
 
@@ -10,6 +10,8 @@ npm run dev
 ```
 
 Open `http://127.0.0.1:5173/`.
+
+The site opens in Chinese by default. Use the language button in the top-right corner to switch between Chinese and English. The same setting is also available in the admin console under Appearance.
 
 ## Admin Access
 

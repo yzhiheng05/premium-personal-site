@@ -2,6 +2,7 @@ import { Download, Plus, RotateCcw, Trash2, Upload } from "lucide-react";
 import type {
   AppearanceData,
   ExperienceItem,
+  Language,
   LinkItem,
   MediaItem,
   ProfileData,
@@ -601,9 +602,11 @@ export function LinksEditor({ links, updateSite }: { links: LinkItem[]; updateSi
 export function AppearanceEditor({
   appearance,
   updateSite,
+  language,
 }: {
   appearance: AppearanceData;
   updateSite: UpdateSite;
+  language: Language;
 }) {
   const update = (patch: Partial<AppearanceData>) =>
     updateSite((data) => ({ ...data, appearance: { ...data.appearance, ...patch } }));
@@ -611,6 +614,16 @@ export function AppearanceEditor({
   return (
     <EditorBlock title="Appearance">
       <div className="form-grid">
+        <Field label={language === "zh" ? "默认语言" : "Default language"}>
+          <Select
+            value={appearance.language}
+            options={[
+              { label: "中文", value: "zh" },
+              { label: "English", value: "en" },
+            ]}
+            onChange={(nextLanguage) => update({ language: nextLanguage as Language })}
+          />
+        </Field>
         <Field label="Theme">
           <Select
             value={appearance.theme}

@@ -11,6 +11,7 @@ export type SectionKey =
 export type ThemeMode = "noir" | "paper" | "system";
 export type Density = "calm" | "compact";
 export type MotionLevel = "full" | "reduced";
+export type Language = "zh" | "en";
 
 export interface ProfileData {
   name: string;
@@ -91,6 +92,7 @@ export interface AppearanceData {
   accent: string;
   density: Density;
   motion: MotionLevel;
+  language: Language;
 }
 
 export interface SeoData {

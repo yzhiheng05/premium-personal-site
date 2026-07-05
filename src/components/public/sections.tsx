@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type {
   ExperienceItem,
+  Language,
   LinkItem,
   MediaItem,
   ProfileData,
@@ -17,15 +18,19 @@ import type {
   ServiceItem,
   WritingItem,
 } from "../../types";
+import { publicCopy } from "../../i18n";
 
 export function HeroSection({
   profile,
   links,
+  language,
 }: {
   profile: ProfileData;
   links: LinkItem[];
+  language: Language;
 }) {
   const visibleLinks = links.filter((link) => link.visible);
+  const copy = publicCopy[language];
 
   return (
     <section className="hero section" id="hero">
@@ -39,7 +44,7 @@ export function HeroSection({
         <p className="hero-tagline">{profile.tagline}</p>
         <div className="hero-actions">
           <a className="button button-primary" href={`mailto:${profile.email}`}>
-            Start a conversation
+            {copy.startConversation}
             <MoveRight size={16} />
           </a>
           {visibleLinks.slice(0, 1).map((link) => (
@@ -53,7 +58,7 @@ export function HeroSection({
       <div className="hero-visual" aria-label="Studio visual">
         {profile.heroImageUrl ? <img src={profile.heroImageUrl} alt="" /> : null}
         <div className="hero-panel">
-          <span>Availability</span>
+          <span>{copy.availability}</span>
           <strong>{profile.availability}</strong>
         </div>
       </div>
@@ -61,27 +66,29 @@ export function HeroSection({
   );
 }
 
-export function AboutSection({ profile }: { profile: ProfileData }) {
+export function AboutSection({ profile, language }: { profile: ProfileData; language: Language }) {
+  const copy = publicCopy[language];
+
   return (
     <section className="section about" id="about">
       <div>
-        <p className="section-kicker">Practice</p>
-        <h2>Quiet systems for work that cannot afford noise.</h2>
+        <p className="section-kicker">{copy.practice}</p>
+        <h2>{copy.aboutHeading}</h2>
       </div>
       <div className="about-body">
         <p>{profile.biography}</p>
         <div className="metrics">
           <div>
             <strong>12+</strong>
-            <span>years shaping complex tools</span>
+            <span>{copy.metricOne}</span>
           </div>
           <div>
             <strong>34</strong>
-            <span>private product systems</span>
+            <span>{copy.metricTwo}</span>
           </div>
           <div>
             <strong>3</strong>
-            <span>operating modes: advise, design, build</span>
+            <span>{copy.metricThree}</span>
           </div>
         </div>
       </div>
@@ -89,14 +96,21 @@ export function AboutSection({ profile }: { profile: ProfileData }) {
   );
 }
 
-export function ProjectsSection({ projects }: { projects: ProjectItem[] }) {
+export function ProjectsSection({
+  projects,
+  language,
+}: {
+  projects: ProjectItem[];
+  language: Language;
+}) {
   const visible = projects.filter((project) => project.visible);
+  const copy = publicCopy[language];
 
   return (
     <section className="section projects" id="projects">
       <div className="section-head">
-        <p className="section-kicker">Selected Work</p>
-        <h2>Systems with a strong point of view.</h2>
+        <p className="section-kicker">{copy.selectedWork}</p>
+        <h2>{copy.projectsHeading}</h2>
       </div>
       <div className="project-list">
         {visible.map((project) => (
@@ -122,12 +136,20 @@ export function ProjectsSection({ projects }: { projects: ProjectItem[] }) {
   );
 }
 
-export function ExperienceSection({ experience }: { experience: ExperienceItem[] }) {
+export function ExperienceSection({
+  experience,
+  language,
+}: {
+  experience: ExperienceItem[];
+  language: Language;
+}) {
+  const copy = publicCopy[language];
+
   return (
     <section className="section timeline" id="experience">
       <div className="section-head">
-        <p className="section-kicker">Experience</p>
-        <h2>From research surfaces to executive tooling.</h2>
+        <p className="section-kicker">{copy.experience}</p>
+        <h2>{copy.experienceHeading}</h2>
       </div>
       <div className="timeline-list">
         {experience
@@ -155,12 +177,14 @@ export function ExperienceSection({ experience }: { experience: ExperienceItem[]
   );
 }
 
-export function WritingSection({ writing }: { writing: WritingItem[] }) {
+export function WritingSection({ writing, language }: { writing: WritingItem[]; language: Language }) {
+  const copy = publicCopy[language];
+
   return (
     <section className="section writing" id="writing">
       <div className="section-head">
-        <p className="section-kicker">Writing</p>
-        <h2>Notes on tools, attention, and institutional memory.</h2>
+        <p className="section-kicker">{copy.writing}</p>
+        <h2>{copy.writingHeading}</h2>
       </div>
       <div className="writing-grid">
         {writing
@@ -178,12 +202,14 @@ export function WritingSection({ writing }: { writing: WritingItem[] }) {
   );
 }
 
-export function MediaSection({ media }: { media: MediaItem[] }) {
+export function MediaSection({ media, language }: { media: MediaItem[]; language: Language }) {
+  const copy = publicCopy[language];
+
   return (
     <section className="section media" id="media">
       <div className="section-head">
-        <p className="section-kicker">Media</p>
-        <h2>Visual notes from the studio archive.</h2>
+        <p className="section-kicker">{copy.media}</p>
+        <h2>{copy.mediaHeading}</h2>
       </div>
       <div className="media-grid">
         {media
@@ -203,12 +229,20 @@ export function MediaSection({ media }: { media: MediaItem[] }) {
   );
 }
 
-export function ServicesSection({ services }: { services: ServiceItem[] }) {
+export function ServicesSection({
+  services,
+  language,
+}: {
+  services: ServiceItem[];
+  language: Language;
+}) {
+  const copy = publicCopy[language];
+
   return (
     <section className="section services" id="services">
       <div className="section-head">
-        <p className="section-kicker">Services</p>
-        <h2>Focused engagements for teams with complicated work.</h2>
+        <p className="section-kicker">{copy.services}</p>
+        <h2>{copy.servicesHeading}</h2>
       </div>
       <div className="service-list">
         {services
@@ -228,15 +262,19 @@ export function ServicesSection({ services }: { services: ServiceItem[] }) {
 export function ContactSection({
   profile,
   links,
+  language,
 }: {
   profile: ProfileData;
   links: LinkItem[];
+  language: Language;
 }) {
+  const copy = publicCopy[language];
+
   return (
     <section className="section contact" id="contact">
       <div>
-        <p className="section-kicker">Contact</p>
-        <h2>Bring the shape of the work. I will bring the operating clarity.</h2>
+        <p className="section-kicker">{copy.contact}</p>
+        <h2>{copy.contactHeading}</h2>
       </div>
       <div className="contact-panel">
         <p>

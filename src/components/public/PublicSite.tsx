@@ -1,4 +1,5 @@
-import type { SiteData, SectionKey } from "../../types";
+import type { Language, SiteData, SectionKey } from "../../types";
+import { publicCopy } from "../../i18n";
 import {
   AboutSection,
   ContactSection,
@@ -10,23 +11,35 @@ import {
   WritingSection,
 } from "./sections";
 
-const renderers: Record<SectionKey, (data: SiteData) => JSX.Element> = {
-  hero: (data) => <HeroSection profile={data.profile} links={data.links} />,
-  about: (data) => <AboutSection profile={data.profile} />,
-  projects: (data) => <ProjectsSection projects={data.projects} />,
-  experience: (data) => <ExperienceSection experience={data.experience} />,
-  writing: (data) => <WritingSection writing={data.writing} />,
-  media: (data) => <MediaSection media={data.media} />,
-  services: (data) => <ServicesSection services={data.services} />,
-  contact: (data) => <ContactSection profile={data.profile} links={data.links} />,
+const renderers: Record<SectionKey, (data: SiteData, language: Language) => JSX.Element> = {
+  hero: (data, language) => <HeroSection profile={data.profile} links={data.links} language={language} />,
+  about: (data, language) => <AboutSection profile={data.profile} language={language} />,
+  projects: (data, language) => <ProjectsSection projects={data.projects} language={language} />,
+  experience: (data, language) => (
+    <ExperienceSection experience={data.experience} language={language} />
+  ),
+  writing: (data, language) => <WritingSection writing={data.writing} language={language} />,
+  media: (data, language) => <MediaSection media={data.media} language={language} />,
+  services: (data, language) => <ServicesSection services={data.services} language={language} />,
+  contact: (data, language) => (
+    <ContactSection profile={data.profile} links={data.links} language={language} />
+  ),
 };
 
 interface PublicSiteProps {
   data: SiteData;
+  language: Language;
+  onLanguageChange: (language: Language) => void;
   onHiddenAdminSignal: () => void;
 }
 
-export function PublicSite({ data, onHiddenAdminSignal }: PublicSiteProps) {
+export function PublicSite({
+  data,
+  language,
+  onLanguageChange,
+  onHiddenAdminSignal,
+}: PublicSiteProps) {
+  const copy = publicCopy[language];
   const visibleSections = [...data.sections]
     .filter((section) => section.visible)
     .sort((a, b) => a.order - b.order);
@@ -47,13 +60,23 @@ export function PublicSite({ data, onHiddenAdminSignal }: PublicSiteProps) {
               </a>
             ))}
         </nav>
-        <a className="topbar-action" href={`mailto:${data.profile.email}`}>
-          Contact
-        </a>
+        <div className="topbar-tools">
+          <button
+            className="language-toggle"
+            type="button"
+            onClick={() => onLanguageChange(language === "zh" ? "en" : "zh")}
+            aria-label="Switch language"
+          >
+            {copy.languageLabel}
+          </button>
+          <a className="topbar-action" href={`mailto:${data.profile.email}`}>
+            {copy.contact}
+          </a>
+        </div>
       </header>
 
       {visibleSections.map((section) => (
-        <div key={section.id}>{renderers[section.id](data)}</div>
+        <div key={section.id}>{renderers[section.id](data, language)}</div>
       ))}
 
       <footer className="footer">

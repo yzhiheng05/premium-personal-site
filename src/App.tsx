@@ -4,7 +4,8 @@ import { AdminPanel } from "./components/admin/AdminPanel";
 import { PublicSite } from "./components/public/PublicSite";
 import { Button, Field, TextInput } from "./components/ui";
 import { cloneDefaultSite, loadSiteData, saveSiteData } from "./data/storage";
-import type { SiteData } from "./types";
+import { adminCopy, localizeSiteData, normalizeLanguage } from "./i18n";
+import type { Language, SiteData } from "./types";
 
 type AdminTab =
   | "dashboard"
@@ -29,12 +30,15 @@ export function App() {
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const hiddenClickCount = useRef(0);
   const keyBuffer = useRef("");
+  const language = normalizeLanguage(siteData.appearance.language);
+  const displayData = useMemo(() => localizeSiteData(siteData, language), [siteData, language]);
+  const adminText = adminCopy[language];
 
   useEffect(() => {
-    document.title = siteData.seo.title;
-    updateMeta("description", siteData.seo.description);
-    updateMeta("keywords", siteData.seo.keywords);
-  }, [siteData.seo]);
+    document.title = displayData.seo.title;
+    updateMeta("description", displayData.seo.description);
+    updateMeta("keywords", displayData.seo.keywords);
+  }, [displayData.seo]);
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -66,6 +70,18 @@ export function App() {
     setSiteData((current) => saveSiteData(updater(current)));
   }, []);
 
+  const setLanguage = useCallback((nextLanguage: Language) => {
+    setSiteData((current) =>
+      saveSiteData({
+        ...current,
+        appearance: {
+          ...current.appearance,
+          language: nextLanguage,
+        },
+      }),
+    );
+  }, []);
+
   const openHiddenLogin = () => {
     hiddenClickCount.current += 1;
     window.setTimeout(() => {
@@ -88,7 +104,7 @@ export function App() {
       return;
     }
 
-    setLoginError("Password did not match.");
+    setLoginError(adminText.passwordError);
   };
 
   const closeAdmin = () => {
@@ -106,28 +122,33 @@ export function App() {
       className={`app theme-${siteData.appearance.theme} density-${siteData.appearance.density} motion-${siteData.appearance.motion}`}
       style={accentStyle}
     >
-      <PublicSite data={siteData} onHiddenAdminSignal={openHiddenLogin} />
+      <PublicSite
+        data={displayData}
+        language={language}
+        onLanguageChange={setLanguage}
+        onHiddenAdminSignal={openHiddenLogin}
+      />
 
       {loginOpen ? (
-        <div className="modal-layer" role="dialog" aria-modal="true" aria-label="Administrator login">
+        <div className="modal-layer" role="dialog" aria-modal="true" aria-label={adminText.loginTitle}>
           <form className="login-panel" onSubmit={submitLogin}>
             <button
               className="icon-button login-close"
               type="button"
               onClick={() => setLoginOpen(false)}
-              aria-label="Close login"
+              aria-label={adminText.closeAdmin}
             >
               <X size={18} />
             </button>
             <LockKeyhole size={22} />
-            <h2>Studio access</h2>
-            <p>Enter the site password to open the editing console.</p>
-            <Field label="Password">
+            <h2>{adminText.loginTitle}</h2>
+            <p>{adminText.loginBody}</p>
+            <Field label={adminText.password}>
               <TextInput value={password} type="password" onChange={setPassword} />
             </Field>
             {loginError ? <p className="login-error">{loginError}</p> : null}
             <Button variant="primary" type="submit">
-              Enter console
+              {adminText.loginButton}
             </Button>
           </form>
         </div>
@@ -136,6 +157,7 @@ export function App() {
       {adminOpen ? (
         <AdminPanel
           data={siteData}
+          language={language}
           tab={activeTab}
           onTabChange={setActiveTab}
           updateSite={updateSite}
