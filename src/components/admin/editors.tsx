@@ -204,6 +204,144 @@ function formatImportError(message: string, language: Language) {
   return message.replace("Import failed", "导入失败");
 }
 
+function csvToItems(value: string): string[] {
+  return value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function updateEnglishValue(data: SiteData, path: string, value: string): SiteData {
+  const [group, idOrField, field] = path.split(".");
+
+  if (group === "profile") {
+    switch (idOrField) {
+      case "name":
+      case "role":
+      case "location":
+      case "availability":
+      case "tagline":
+      case "biography":
+        return { ...data, profile: { ...data.profile, [idOrField]: value } };
+      default:
+        return data;
+    }
+  }
+
+  if (group === "sections" && field === "title") {
+    return {
+      ...data,
+      sections: data.sections.map((section) =>
+        section.id === idOrField ? { ...section, title: value } : section,
+      ),
+    };
+  }
+
+  if (group === "links" && field === "label") {
+    return {
+      ...data,
+      links: data.links.map((link) => (link.id === idOrField ? { ...link, label: value } : link)),
+    };
+  }
+
+  if (group === "projects") {
+    switch (field) {
+      case "title":
+      case "category":
+      case "description":
+      case "status":
+        return {
+          ...data,
+          projects: data.projects.map((project) =>
+            project.id === idOrField ? { ...project, [field]: value } : project,
+          ),
+        };
+      default:
+        return data;
+    }
+  }
+
+  if (group === "experience") {
+    switch (field) {
+      case "organization":
+      case "role":
+      case "description":
+        return {
+          ...data,
+          experience: data.experience.map((item) =>
+            item.id === idOrField ? { ...item, [field]: value } : item,
+          ),
+        };
+      case "highlights":
+        return {
+          ...data,
+          experience: data.experience.map((item) =>
+            item.id === idOrField ? { ...item, highlights: csvToItems(value) } : item,
+          ),
+        };
+      default:
+        return data;
+    }
+  }
+
+  if (group === "writing") {
+    switch (field) {
+      case "title":
+      case "tag":
+      case "summary":
+        return {
+          ...data,
+          writing: data.writing.map((item) =>
+            item.id === idOrField ? { ...item, [field]: value } : item,
+          ),
+        };
+      default:
+        return data;
+    }
+  }
+
+  if (group === "media") {
+    switch (field) {
+      case "title":
+      case "caption":
+        return {
+          ...data,
+          media: data.media.map((item) => (item.id === idOrField ? { ...item, [field]: value } : item)),
+        };
+      default:
+        return data;
+    }
+  }
+
+  if (group === "services") {
+    switch (field) {
+      case "title":
+      case "description":
+        return {
+          ...data,
+          services: data.services.map((service) =>
+            service.id === idOrField ? { ...service, [field]: value } : service,
+          ),
+        };
+      default:
+        return data;
+    }
+  }
+
+  if (group === "seo") {
+    switch (idOrField) {
+      case "title":
+      case "description":
+      case "keywords":
+        return { ...data, seo: { ...data.seo, [idOrField]: value } };
+      default:
+        return data;
+    }
+  }
+
+  return data;
+}
+
 export function ProfileEditor({
   profile,
   updateSite,
@@ -319,6 +457,8 @@ export function TranslationEditor({
         },
       },
     }));
+  const updateEnglish = (path: string, value: string) =>
+    updateSite((current) => updateEnglishValue(current, path, value));
 
   const valueFor = (path: string) => data.translations?.zh[path] ?? "";
 
@@ -355,28 +495,32 @@ export function TranslationEditor({
             label="姓名"
             path="profile.name"
             value={valueFor("profile.name")}
-            source={data.profile.name}
+            sourceValue={data.profile.name}
+            onSourceChange={updateEnglish}
             onChange={updateTranslation}
           />
           <TranslationInput
             label="身份"
             path="profile.role"
             value={valueFor("profile.role")}
-            source={data.profile.role}
+            sourceValue={data.profile.role}
+            onSourceChange={updateEnglish}
             onChange={updateTranslation}
           />
           <TranslationInput
             label="地点"
             path="profile.location"
             value={valueFor("profile.location")}
-            source={data.profile.location}
+            sourceValue={data.profile.location}
+            onSourceChange={updateEnglish}
             onChange={updateTranslation}
           />
           <TranslationInput
             label="可合作状态"
             path="profile.availability"
             value={valueFor("profile.availability")}
-            source={data.profile.availability}
+            sourceValue={data.profile.availability}
+            onSourceChange={updateEnglish}
             onChange={updateTranslation}
           />
         </div>
@@ -385,7 +529,8 @@ export function TranslationEditor({
           label="简介短句"
           path="profile.tagline"
           value={valueFor("profile.tagline")}
-          source={data.profile.tagline}
+          sourceValue={data.profile.tagline}
+          onSourceChange={updateEnglish}
           onChange={updateTranslation}
         />
         <TranslationInput
@@ -393,7 +538,8 @@ export function TranslationEditor({
           label="个人介绍"
           path="profile.biography"
           value={valueFor("profile.biography")}
-          source={data.profile.biography}
+          sourceValue={data.profile.biography}
+          onSourceChange={updateEnglish}
           onChange={updateTranslation}
         />
       </EditorBlock>
@@ -406,7 +552,8 @@ export function TranslationEditor({
               label={`${section.title} 模块名`}
               path={`sections.${section.id}.title`}
               value={valueFor(`sections.${section.id}.title`)}
-              source={section.title}
+              sourceValue={section.title}
+              onSourceChange={updateEnglish}
               onChange={updateTranslation}
             />
           ))}
@@ -416,7 +563,8 @@ export function TranslationEditor({
               label={`${link.label} 链接名`}
               path={`links.${link.id}.label`}
               value={valueFor(`links.${link.id}.label`)}
-              source={link.label}
+              sourceValue={link.label}
+              onSourceChange={updateEnglish}
               onChange={updateTranslation}
             />
           ))}
@@ -434,21 +582,24 @@ export function TranslationEditor({
                 label="项目名"
                 path={`projects.${project.id}.title`}
                 value={valueFor(`projects.${project.id}.title`)}
-                source={project.title}
+                sourceValue={project.title}
+                onSourceChange={updateEnglish}
                 onChange={updateTranslation}
               />
               <TranslationInput
                 label="类别"
                 path={`projects.${project.id}.category`}
                 value={valueFor(`projects.${project.id}.category`)}
-                source={project.category}
+                sourceValue={project.category}
+                onSourceChange={updateEnglish}
                 onChange={updateTranslation}
               />
               <TranslationInput
                 label="状态"
                 path={`projects.${project.id}.status`}
                 value={valueFor(`projects.${project.id}.status`)}
-                source={project.status}
+                sourceValue={project.status}
+                onSourceChange={updateEnglish}
                 onChange={updateTranslation}
               />
             </div>
@@ -457,7 +608,8 @@ export function TranslationEditor({
               label="描述"
               path={`projects.${project.id}.description`}
               value={valueFor(`projects.${project.id}.description`)}
-              source={project.description}
+              sourceValue={project.description}
+              onSourceChange={updateEnglish}
               onChange={updateTranslation}
             />
           </article>
@@ -475,21 +627,24 @@ export function TranslationEditor({
                 label="机构"
                 path={`experience.${item.id}.organization`}
                 value={valueFor(`experience.${item.id}.organization`)}
-                source={item.organization}
+                sourceValue={item.organization}
+                onSourceChange={updateEnglish}
                 onChange={updateTranslation}
               />
               <TranslationInput
                 label="职位"
                 path={`experience.${item.id}.role`}
                 value={valueFor(`experience.${item.id}.role`)}
-                source={item.role}
+                sourceValue={item.role}
+                onSourceChange={updateEnglish}
                 onChange={updateTranslation}
               />
               <TranslationInput
                 label="亮点，逗号分隔"
                 path={`experience.${item.id}.highlights`}
                 value={valueFor(`experience.${item.id}.highlights`)}
-                source={item.highlights.join(", ")}
+                sourceValue={item.highlights.join(", ")}
+                onSourceChange={updateEnglish}
                 onChange={updateTranslation}
               />
             </div>
@@ -498,7 +653,8 @@ export function TranslationEditor({
               label="描述"
               path={`experience.${item.id}.description`}
               value={valueFor(`experience.${item.id}.description`)}
-              source={item.description}
+              sourceValue={item.description}
+              onSourceChange={updateEnglish}
               onChange={updateTranslation}
             />
           </article>
@@ -516,14 +672,16 @@ export function TranslationEditor({
                 label="标题"
                 path={`writing.${item.id}.title`}
                 value={valueFor(`writing.${item.id}.title`)}
-                source={item.title}
+                sourceValue={item.title}
+                onSourceChange={updateEnglish}
                 onChange={updateTranslation}
               />
               <TranslationInput
                 label="标签"
                 path={`writing.${item.id}.tag`}
                 value={valueFor(`writing.${item.id}.tag`)}
-                source={item.tag}
+                sourceValue={item.tag}
+                onSourceChange={updateEnglish}
                 onChange={updateTranslation}
               />
             </div>
@@ -532,7 +690,8 @@ export function TranslationEditor({
               label="摘要"
               path={`writing.${item.id}.summary`}
               value={valueFor(`writing.${item.id}.summary`)}
-              source={item.summary}
+              sourceValue={item.summary}
+              onSourceChange={updateEnglish}
               onChange={updateTranslation}
             />
           </article>
@@ -549,7 +708,8 @@ export function TranslationEditor({
               label="标题"
               path={`media.${item.id}.title`}
               value={valueFor(`media.${item.id}.title`)}
-              source={item.title}
+              sourceValue={item.title}
+              onSourceChange={updateEnglish}
               onChange={updateTranslation}
             />
             <TranslationInput
@@ -557,7 +717,8 @@ export function TranslationEditor({
               label="说明"
               path={`media.${item.id}.caption`}
               value={valueFor(`media.${item.id}.caption`)}
-              source={item.caption}
+              sourceValue={item.caption}
+              onSourceChange={updateEnglish}
               onChange={updateTranslation}
             />
           </article>
@@ -571,7 +732,8 @@ export function TranslationEditor({
               label="服务名"
               path={`services.${service.id}.title`}
               value={valueFor(`services.${service.id}.title`)}
-              source={service.title}
+              sourceValue={service.title}
+              onSourceChange={updateEnglish}
               onChange={updateTranslation}
             />
             <TranslationInput
@@ -579,7 +741,8 @@ export function TranslationEditor({
               label="服务描述"
               path={`services.${service.id}.description`}
               value={valueFor(`services.${service.id}.description`)}
-              source={service.description}
+              sourceValue={service.description}
+              onSourceChange={updateEnglish}
               onChange={updateTranslation}
             />
           </article>
@@ -591,7 +754,8 @@ export function TranslationEditor({
           label="页面标题"
           path="seo.title"
           value={valueFor("seo.title")}
-          source={data.seo.title}
+          sourceValue={data.seo.title}
+          onSourceChange={updateEnglish}
           onChange={updateTranslation}
         />
         <TranslationInput
@@ -599,14 +763,16 @@ export function TranslationEditor({
           label="页面描述"
           path="seo.description"
           value={valueFor("seo.description")}
-          source={data.seo.description}
+          sourceValue={data.seo.description}
+          onSourceChange={updateEnglish}
           onChange={updateTranslation}
         />
         <TranslationInput
           label="关键词"
           path="seo.keywords"
           value={valueFor("seo.keywords")}
-          source={data.seo.keywords}
+          sourceValue={data.seo.keywords}
+          onSourceChange={updateEnglish}
           onChange={updateTranslation}
         />
       </EditorBlock>
@@ -618,25 +784,39 @@ function TranslationInput({
   label,
   path,
   value,
-  source,
+  sourceValue,
+  onSourceChange,
   onChange,
   area = false,
 }: {
   label: string;
   path: string;
   value: string;
-  source: string;
+  sourceValue: string;
+  onSourceChange: (path: string, value: string) => void;
   onChange: (path: string, value: string) => void;
   area?: boolean;
 }) {
   return (
-    <Field label={label} hint={`英文原文：${source}`}>
-      {area ? (
-        <TextArea value={value} onChange={(next) => onChange(path, next)} />
-      ) : (
-        <TextInput value={value} onChange={(next) => onChange(path, next)} />
-      )}
-    </Field>
+    <div className="translation-field">
+      <span>{label}</span>
+      <div className="translation-pair">
+        <Field label="英文">
+          {area ? (
+            <TextArea value={sourceValue} onChange={(next) => onSourceChange(path, next)} />
+          ) : (
+            <TextInput value={sourceValue} onChange={(next) => onSourceChange(path, next)} />
+          )}
+        </Field>
+        <Field label="中文">
+          {area ? (
+            <TextArea value={value} onChange={(next) => onChange(path, next)} />
+          ) : (
+            <TextInput value={value} onChange={(next) => onChange(path, next)} />
+          )}
+        </Field>
+      </div>
+    </div>
   );
 }
 
