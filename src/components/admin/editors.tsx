@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Download, Plus, RotateCcw, Trash2, Upload } from "lucide-react";
 import type {
   AppearanceData,
@@ -538,6 +539,7 @@ export function ProjectsEditor({
                 </Button>
                 <Button
                   variant="danger"
+                  ariaLabel={`Delete ${project.title}`}
                   onClick={() =>
                     updateSite((data) => ({
                       ...data,
@@ -1036,14 +1038,18 @@ export function DataEditor({
   onImport: (data: SiteData) => void;
   onReset: () => void;
 }) {
+  const [importError, setImportError] = useState("");
+
   const handleFile = (file: File | null) => {
     if (!file) return;
+    setImportError("");
     const reader = new FileReader();
     reader.onload = () => {
       try {
         onImport(parseSiteJson(String(reader.result)));
+        setImportError("");
       } catch (error) {
-        alert(error instanceof Error ? error.message : "Import failed.");
+        setImportError(error instanceof Error ? error.message : "Import failed.");
       }
     };
     reader.readAsText(file);
@@ -1068,6 +1074,11 @@ export function DataEditor({
           <RotateCcw size={15} /> Reset
         </Button>
       </div>
+      {importError ? (
+        <p className="import-error" role="alert">
+          {importError}
+        </p>
+      ) : null}
       <pre className="json-preview">{exportSiteData(data).slice(0, 1600)}</pre>
     </EditorBlock>
   );
@@ -1107,7 +1118,11 @@ function CollectionEditor<T extends { id: string; title?: string; role?: string 
               <div className="row-actions">
                 <Button onClick={() => moveItemAt(index, -1)}>Up</Button>
                 <Button onClick={() => moveItemAt(index, 1)}>Down</Button>
-                <Button variant="danger" onClick={() => deleteItem(item.id)}>
+                <Button
+                  variant="danger"
+                  ariaLabel={`Delete ${item.title ?? item.role ?? item.id}`}
+                  onClick={() => deleteItem(item.id)}
+                >
                   <Trash2 size={15} />
                 </Button>
               </div>

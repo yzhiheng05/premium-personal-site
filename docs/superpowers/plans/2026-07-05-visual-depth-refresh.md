@@ -20,25 +20,25 @@
 
 ### Task 1: Add Bilingual Public Labels
 
-- [ ] Add concise labels under `publicCopy.en` and `publicCopy.zh` for hero dossier and media/project archive details.
-- [ ] Keep the labels generic enough for edited user content and avoid adding new data fields.
+- [x] Add concise labels under `publicCopy.en` and `publicCopy.zh` for hero dossier and media/project archive details.
+- [x] Keep the labels generic enough for edited user content and avoid adding new data fields.
 
 ### Task 2: Add Public Markup Hooks
 
-- [ ] In `HeroSection`, add a non-editable visual dossier layer using existing profile values and new localized labels.
-- [ ] In `ProjectsSection`, include project index markers and wrap category/status metadata for richer card styling.
-- [ ] In `MediaSection`, include archive index markers and allow the first media item to receive a stronger layout treatment.
+- [x] In `HeroSection`, add a non-editable visual dossier layer using existing profile values and new localized labels.
+- [x] In `ProjectsSection`, include project index markers and wrap category/status metadata for richer card styling.
+- [x] In `MediaSection`, include archive index markers and allow the first media item to receive a stronger layout treatment.
 
 ### Task 3: Add Visual CSS
 
-- [ ] Add background texture and fine-grid overlays to `.app` and `.hero-visual`.
-- [ ] Add dossier card, coordinate marks, and image treatment to the hero.
-- [ ] Add numbered project card headers, status rails, hover light sweep, and stronger featured card composition.
-- [ ] Add archive-wall styling for media cards and responsive fallbacks.
+- [x] Add background texture and fine-grid overlays to `.app` and `.hero-visual`.
+- [x] Add dossier card, coordinate marks, and image treatment to the hero.
+- [x] Add numbered project card headers, status rails, hover light sweep, and stronger featured card composition.
+- [x] Add archive-wall styling for media cards and responsive fallbacks.
 
 ### Task 4: Verify
 
-- [ ] Run `npm test`.
-- [ ] Run `npm run build`.
-- [ ] Run `npm audit`.
-- [ ] Check desktop and mobile rendering in browser for no overlap, no blank page, no console errors, and no horizontal overflow.
+- [x] Run `npm test`.
+- [x] Run `npm run build`.
+- [x] Run `npm audit`.
+- [x] Check desktop and mobile rendering in browser for no overlap, no blank page, no console errors, and no horizontal overflow.

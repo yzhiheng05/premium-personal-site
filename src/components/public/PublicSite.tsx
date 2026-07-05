@@ -65,7 +65,7 @@ export function PublicSite({
             className="language-toggle"
             type="button"
             onClick={() => onLanguageChange(language === "zh" ? "en" : "zh")}
-            aria-label="Switch language"
+            aria-label={copy.switchLanguage}
           >
             {copy.languageLabel}
           </button>
@@ -84,7 +84,7 @@ export function PublicSite({
         <button
           className="admin-mark"
           type="button"
-          aria-label="Site mark"
+          aria-label={copy.adminMark}
           onClick={onHiddenAdminSignal}
         >
           2026

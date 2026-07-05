@@ -7,6 +7,7 @@ interface ButtonProps {
   variant?: "primary" | "ghost" | "danger";
   disabled?: boolean;
   title?: string;
+  ariaLabel?: string;
 }
 
 export function Button({
@@ -16,6 +17,7 @@ export function Button({
   variant = "ghost",
   disabled = false,
   title,
+  ariaLabel,
 }: ButtonProps) {
   return (
     <button
@@ -24,6 +26,7 @@ export function Button({
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-label={ariaLabel}
     >
       {children}
     </button>

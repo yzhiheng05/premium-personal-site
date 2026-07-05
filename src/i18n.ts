@@ -27,6 +27,8 @@ export const publicCopy = {
     currentFile: "Current file",
     fieldIndex: "Field index",
     archiveRecord: "Archive record",
+    switchLanguage: "Switch language",
+    adminMark: "Site mark",
   },
   zh: {
     contact: "联系",
@@ -53,6 +55,8 @@ export const publicCopy = {
     currentFile: "当前档案",
     fieldIndex: "字段索引",
     archiveRecord: "档案记录",
+    switchLanguage: "切换语言",
+    adminMark: "站点标记",
   },
 } as const;
 
