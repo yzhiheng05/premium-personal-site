@@ -119,30 +119,30 @@ export function AdminPanel({
         </header>
         {tab === "dashboard" ? <Dashboard data={data} language={language} /> : null}
         {tab === "profile" ? (
-          <ProfileEditor profile={data.profile} updateSite={updateSite} language={language} />
+          <ProfileEditor data={data} updateSite={updateSite} language={language} />
         ) : null}
         {tab === "sections" ? (
-          <SectionsEditor sections={data.sections} updateSite={updateSite} language={language} />
+          <SectionsEditor data={data} updateSite={updateSite} language={language} />
         ) : null}
         {tab === "projects" ? (
-          <ProjectsEditor projects={data.projects} updateSite={updateSite} language={language} />
+          <ProjectsEditor data={data} updateSite={updateSite} language={language} />
         ) : null}
         {tab === "experience" ? (
-          <ExperienceEditor experience={data.experience} updateSite={updateSite} language={language} />
+          <ExperienceEditor data={data} updateSite={updateSite} language={language} />
         ) : null}
         {tab === "writing" ? (
-          <WritingEditor writing={data.writing} updateSite={updateSite} language={language} />
+          <WritingEditor data={data} updateSite={updateSite} language={language} />
         ) : null}
-        {tab === "media" ? <MediaEditor media={data.media} updateSite={updateSite} language={language} /> : null}
+        {tab === "media" ? <MediaEditor data={data} updateSite={updateSite} language={language} /> : null}
         {tab === "services" ? (
-          <ServicesEditor services={data.services} updateSite={updateSite} language={language} />
+          <ServicesEditor data={data} updateSite={updateSite} language={language} />
         ) : null}
-        {tab === "links" ? <LinksEditor links={data.links} updateSite={updateSite} language={language} /> : null}
+        {tab === "links" ? <LinksEditor data={data} updateSite={updateSite} language={language} /> : null}
         {tab === "appearance" ? (
           <AppearanceEditor appearance={data.appearance} updateSite={updateSite} language={language} />
         ) : null}
-        {tab === "translations" ? <TranslationEditor data={data} updateSite={updateSite} /> : null}
-        {tab === "seo" ? <SeoEditor seo={data.seo} updateSite={updateSite} language={language} /> : null}
+        {tab === "translations" ? <TranslationEditor data={data} language={language} /> : null}
+        {tab === "seo" ? <SeoEditor data={data} updateSite={updateSite} language={language} /> : null}
         {tab === "data" ? (
           <DataEditor data={data} onImport={onImport} onReset={onReset} language={language} />
         ) : null}

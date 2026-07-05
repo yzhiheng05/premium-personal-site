@@ -81,6 +81,10 @@ const editorCopy = {
     importJson: "Import JSON",
     reset: "Reset",
     importFailed: "Import failed.",
+    englishContent: "English",
+    chineseContent: "Chinese",
+    translationCheck: "Translation Check",
+    translationCheckBody: "Use the content tabs to edit English and Chinese side by side.",
     options: {
       english: "English",
       image: "Image",
@@ -156,6 +160,10 @@ const editorCopy = {
     importJson: "导入 JSON",
     reset: "重置",
     importFailed: "导入失败。",
+    englishContent: "英文",
+    chineseContent: "中文",
+    translationCheck: "翻译检查",
+    translationCheckBody: "请在各内容页并排编辑英文和中文，这里只检查中文覆盖情况。",
     options: {
       english: "英文",
       image: "图片",
@@ -342,40 +350,74 @@ function updateEnglishValue(data: SiteData, path: string, value: string): SiteDa
   return data;
 }
 
+function updateChineseValue(data: SiteData, path: string, value: string): SiteData {
+  return {
+    ...data,
+    translations: {
+      zh: {
+        ...data.translations?.zh,
+        [path]: value,
+      },
+    },
+  };
+}
+
+function chineseValue(data: SiteData, path: string): string {
+  return data.translations?.zh[path] ?? "";
+}
+
 export function ProfileEditor({
-  profile,
+  data,
   updateSite,
   language,
 }: {
-  profile: ProfileData;
+  data: SiteData;
   updateSite: UpdateSite;
   language: Language;
 }) {
   const t = editorCopy[language];
+  const profile = data.profile;
   const update = (patch: Partial<ProfileData>) =>
     updateSite((data) => ({ ...data, profile: { ...data.profile, ...patch } }));
 
   return (
     <EditorBlock title={t.profile}>
       <div className="form-grid">
-        <Field label={t.name}>
-          <TextInput value={profile.name} onChange={(name) => update({ name })} />
-        </Field>
-        <Field label={t.role}>
-          <TextInput value={profile.role} onChange={(role) => update({ role })} />
-        </Field>
-        <Field label={t.location}>
-          <TextInput value={profile.location} onChange={(location) => update({ location })} />
-        </Field>
+        <BilingualField
+          label={t.name}
+          language={language}
+          path="profile.name"
+          sourceValue={profile.name}
+          translationValue={chineseValue(data, "profile.name")}
+          updateSite={updateSite}
+        />
+        <BilingualField
+          label={t.role}
+          language={language}
+          path="profile.role"
+          sourceValue={profile.role}
+          translationValue={chineseValue(data, "profile.role")}
+          updateSite={updateSite}
+        />
+        <BilingualField
+          label={t.location}
+          language={language}
+          path="profile.location"
+          sourceValue={profile.location}
+          translationValue={chineseValue(data, "profile.location")}
+          updateSite={updateSite}
+        />
         <Field label={t.email}>
           <TextInput value={profile.email} onChange={(email) => update({ email })} />
         </Field>
-        <Field label={t.availability}>
-          <TextInput
-            value={profile.availability}
-            onChange={(availability) => update({ availability })}
-          />
-        </Field>
+        <BilingualField
+          label={t.availability}
+          language={language}
+          path="profile.availability"
+          sourceValue={profile.availability}
+          translationValue={chineseValue(data, "profile.availability")}
+          updateSite={updateSite}
+        />
         <Field label={t.heroImageUrl}>
           <TextInput
             value={profile.heroImageUrl}
@@ -383,26 +425,39 @@ export function ProfileEditor({
           />
         </Field>
       </div>
-      <Field label={t.tagline}>
-        <TextArea value={profile.tagline} onChange={(tagline) => update({ tagline })} />
-      </Field>
-      <Field label={t.biography}>
-        <TextArea value={profile.biography} onChange={(biography) => update({ biography })} />
-      </Field>
+      <BilingualField
+        area
+        label={t.tagline}
+        language={language}
+        path="profile.tagline"
+        sourceValue={profile.tagline}
+        translationValue={chineseValue(data, "profile.tagline")}
+        updateSite={updateSite}
+      />
+      <BilingualField
+        area
+        label={t.biography}
+        language={language}
+        path="profile.biography"
+        sourceValue={profile.biography}
+        translationValue={chineseValue(data, "profile.biography")}
+        updateSite={updateSite}
+      />
     </EditorBlock>
   );
 }
 
 export function SectionsEditor({
-  sections,
+  data,
   updateSite,
   language,
 }: {
-  sections: SectionSetting[];
+  data: SiteData;
   updateSite: UpdateSite;
   language: Language;
 }) {
   const t = editorCopy[language];
+  const sections = data.sections;
   const ordered = [...sections].sort((a, b) => a.order - b.order);
   const commitOrder = (next: SectionSetting[]) =>
     updateSite((data) => ({
@@ -415,7 +470,14 @@ export function SectionsEditor({
       <div className="admin-list">
         {ordered.map((section, index) => (
           <div className="admin-row" key={section.id}>
-            <strong>{section.title}</strong>
+            <BilingualField
+              label={t.title}
+              language={language}
+              path={`sections.${section.id}.title`}
+              sourceValue={section.title}
+              translationValue={chineseValue(data, `sections.${section.id}.title`)}
+              updateSite={updateSite}
+            />
             <div className="row-actions">
               <Toggle
                 checked={section.visible}
@@ -439,32 +501,14 @@ export function SectionsEditor({
   );
 }
 
-export function TranslationEditor({
-  data,
-  updateSite,
-}: {
-  data: SiteData;
-  updateSite: UpdateSite;
-}) {
+export function TranslationEditor({ data, language }: { data: SiteData; language: Language }) {
+  const t = editorCopy[language];
   const coverage = getChineseTranslationCoverage(data);
-  const updateTranslation = (path: string, value: string) =>
-    updateSite((current) => ({
-      ...current,
-      translations: {
-        zh: {
-          ...current.translations?.zh,
-          [path]: value,
-        },
-      },
-    }));
-  const updateEnglish = (path: string, value: string) =>
-    updateSite((current) => updateEnglishValue(current, path, value));
-
-  const valueFor = (path: string) => data.translations?.zh[path] ?? "";
 
   return (
     <div className="stack">
-      <EditorBlock title="中文翻译进度">
+      <EditorBlock title={t.translationCheck}>
+        <p className="translation-complete">{t.translationCheckBody}</p>
         <div className="translation-summary">
           <div>
             <strong>{coverage.completed}</strong>
@@ -488,331 +532,49 @@ export function TranslationEditor({
           <p className="translation-complete">当前中文内容已覆盖所有可编辑字段。</p>
         )}
       </EditorBlock>
-
-      <EditorBlock title="个人资料中文">
-        <div className="form-grid">
-          <TranslationInput
-            label="姓名"
-            path="profile.name"
-            value={valueFor("profile.name")}
-            sourceValue={data.profile.name}
-            onSourceChange={updateEnglish}
-            onChange={updateTranslation}
-          />
-          <TranslationInput
-            label="身份"
-            path="profile.role"
-            value={valueFor("profile.role")}
-            sourceValue={data.profile.role}
-            onSourceChange={updateEnglish}
-            onChange={updateTranslation}
-          />
-          <TranslationInput
-            label="地点"
-            path="profile.location"
-            value={valueFor("profile.location")}
-            sourceValue={data.profile.location}
-            onSourceChange={updateEnglish}
-            onChange={updateTranslation}
-          />
-          <TranslationInput
-            label="可合作状态"
-            path="profile.availability"
-            value={valueFor("profile.availability")}
-            sourceValue={data.profile.availability}
-            onSourceChange={updateEnglish}
-            onChange={updateTranslation}
-          />
-        </div>
-        <TranslationInput
-          area
-          label="简介短句"
-          path="profile.tagline"
-          value={valueFor("profile.tagline")}
-          sourceValue={data.profile.tagline}
-          onSourceChange={updateEnglish}
-          onChange={updateTranslation}
-        />
-        <TranslationInput
-          area
-          label="个人介绍"
-          path="profile.biography"
-          value={valueFor("profile.biography")}
-          sourceValue={data.profile.biography}
-          onSourceChange={updateEnglish}
-          onChange={updateTranslation}
-        />
-      </EditorBlock>
-
-      <EditorBlock title="模块与链接中文">
-        <div className="form-grid">
-          {data.sections.map((section) => (
-            <TranslationInput
-              key={section.id}
-              label={`${section.title} 模块名`}
-              path={`sections.${section.id}.title`}
-              value={valueFor(`sections.${section.id}.title`)}
-              sourceValue={section.title}
-              onSourceChange={updateEnglish}
-              onChange={updateTranslation}
-            />
-          ))}
-          {data.links.map((link) => (
-            <TranslationInput
-              key={link.id}
-              label={`${link.label} 链接名`}
-              path={`links.${link.id}.label`}
-              value={valueFor(`links.${link.id}.label`)}
-              sourceValue={link.label}
-              onSourceChange={updateEnglish}
-              onChange={updateTranslation}
-            />
-          ))}
-        </div>
-      </EditorBlock>
-
-      <EditorBlock title="项目中文">
-        {data.projects.map((project) => (
-          <article className="edit-card" key={project.id}>
-            <div className="card-toolbar">
-              <strong>{project.title}</strong>
-            </div>
-            <div className="form-grid">
-              <TranslationInput
-                label="项目名"
-                path={`projects.${project.id}.title`}
-                value={valueFor(`projects.${project.id}.title`)}
-                sourceValue={project.title}
-                onSourceChange={updateEnglish}
-                onChange={updateTranslation}
-              />
-              <TranslationInput
-                label="类别"
-                path={`projects.${project.id}.category`}
-                value={valueFor(`projects.${project.id}.category`)}
-                sourceValue={project.category}
-                onSourceChange={updateEnglish}
-                onChange={updateTranslation}
-              />
-              <TranslationInput
-                label="状态"
-                path={`projects.${project.id}.status`}
-                value={valueFor(`projects.${project.id}.status`)}
-                sourceValue={project.status}
-                onSourceChange={updateEnglish}
-                onChange={updateTranslation}
-              />
-            </div>
-            <TranslationInput
-              area
-              label="描述"
-              path={`projects.${project.id}.description`}
-              value={valueFor(`projects.${project.id}.description`)}
-              sourceValue={project.description}
-              onSourceChange={updateEnglish}
-              onChange={updateTranslation}
-            />
-          </article>
-        ))}
-      </EditorBlock>
-
-      <EditorBlock title="经历中文">
-        {data.experience.map((item) => (
-          <article className="edit-card" key={item.id}>
-            <div className="card-toolbar">
-              <strong>{item.role}</strong>
-            </div>
-            <div className="form-grid">
-              <TranslationInput
-                label="机构"
-                path={`experience.${item.id}.organization`}
-                value={valueFor(`experience.${item.id}.organization`)}
-                sourceValue={item.organization}
-                onSourceChange={updateEnglish}
-                onChange={updateTranslation}
-              />
-              <TranslationInput
-                label="职位"
-                path={`experience.${item.id}.role`}
-                value={valueFor(`experience.${item.id}.role`)}
-                sourceValue={item.role}
-                onSourceChange={updateEnglish}
-                onChange={updateTranslation}
-              />
-              <TranslationInput
-                label="亮点，逗号分隔"
-                path={`experience.${item.id}.highlights`}
-                value={valueFor(`experience.${item.id}.highlights`)}
-                sourceValue={item.highlights.join(", ")}
-                onSourceChange={updateEnglish}
-                onChange={updateTranslation}
-              />
-            </div>
-            <TranslationInput
-              area
-              label="描述"
-              path={`experience.${item.id}.description`}
-              value={valueFor(`experience.${item.id}.description`)}
-              sourceValue={item.description}
-              onSourceChange={updateEnglish}
-              onChange={updateTranslation}
-            />
-          </article>
-        ))}
-      </EditorBlock>
-
-      <EditorBlock title="文章中文">
-        {data.writing.map((item) => (
-          <article className="edit-card" key={item.id}>
-            <div className="card-toolbar">
-              <strong>{item.title}</strong>
-            </div>
-            <div className="form-grid">
-              <TranslationInput
-                label="标题"
-                path={`writing.${item.id}.title`}
-                value={valueFor(`writing.${item.id}.title`)}
-                sourceValue={item.title}
-                onSourceChange={updateEnglish}
-                onChange={updateTranslation}
-              />
-              <TranslationInput
-                label="标签"
-                path={`writing.${item.id}.tag`}
-                value={valueFor(`writing.${item.id}.tag`)}
-                sourceValue={item.tag}
-                onSourceChange={updateEnglish}
-                onChange={updateTranslation}
-              />
-            </div>
-            <TranslationInput
-              area
-              label="摘要"
-              path={`writing.${item.id}.summary`}
-              value={valueFor(`writing.${item.id}.summary`)}
-              sourceValue={item.summary}
-              onSourceChange={updateEnglish}
-              onChange={updateTranslation}
-            />
-          </article>
-        ))}
-      </EditorBlock>
-
-      <EditorBlock title="媒体与服务中文">
-        {data.media.map((item) => (
-          <article className="edit-card" key={item.id}>
-            <div className="card-toolbar">
-              <strong>{item.title}</strong>
-            </div>
-            <TranslationInput
-              label="标题"
-              path={`media.${item.id}.title`}
-              value={valueFor(`media.${item.id}.title`)}
-              sourceValue={item.title}
-              onSourceChange={updateEnglish}
-              onChange={updateTranslation}
-            />
-            <TranslationInput
-              area
-              label="说明"
-              path={`media.${item.id}.caption`}
-              value={valueFor(`media.${item.id}.caption`)}
-              sourceValue={item.caption}
-              onSourceChange={updateEnglish}
-              onChange={updateTranslation}
-            />
-          </article>
-        ))}
-        {data.services.map((service) => (
-          <article className="edit-card" key={service.id}>
-            <div className="card-toolbar">
-              <strong>{service.title}</strong>
-            </div>
-            <TranslationInput
-              label="服务名"
-              path={`services.${service.id}.title`}
-              value={valueFor(`services.${service.id}.title`)}
-              sourceValue={service.title}
-              onSourceChange={updateEnglish}
-              onChange={updateTranslation}
-            />
-            <TranslationInput
-              area
-              label="服务描述"
-              path={`services.${service.id}.description`}
-              value={valueFor(`services.${service.id}.description`)}
-              sourceValue={service.description}
-              onSourceChange={updateEnglish}
-              onChange={updateTranslation}
-            />
-          </article>
-        ))}
-      </EditorBlock>
-
-      <EditorBlock title="SEO 中文">
-        <TranslationInput
-          label="页面标题"
-          path="seo.title"
-          value={valueFor("seo.title")}
-          sourceValue={data.seo.title}
-          onSourceChange={updateEnglish}
-          onChange={updateTranslation}
-        />
-        <TranslationInput
-          area
-          label="页面描述"
-          path="seo.description"
-          value={valueFor("seo.description")}
-          sourceValue={data.seo.description}
-          onSourceChange={updateEnglish}
-          onChange={updateTranslation}
-        />
-        <TranslationInput
-          label="关键词"
-          path="seo.keywords"
-          value={valueFor("seo.keywords")}
-          sourceValue={data.seo.keywords}
-          onSourceChange={updateEnglish}
-          onChange={updateTranslation}
-        />
-      </EditorBlock>
     </div>
   );
 }
 
-function TranslationInput({
+function BilingualField({
   label,
+  language,
   path,
-  value,
   sourceValue,
-  onSourceChange,
-  onChange,
+  translationValue,
+  updateSite,
   area = false,
 }: {
   label: string;
+  language: Language;
   path: string;
-  value: string;
   sourceValue: string;
-  onSourceChange: (path: string, value: string) => void;
-  onChange: (path: string, value: string) => void;
+  translationValue: string;
+  updateSite: UpdateSite;
   area?: boolean;
 }) {
+  const t = editorCopy[language];
+  const updateEnglish = (next: string) =>
+    updateSite((current) => updateEnglishValue(current, path, next));
+  const updateChinese = (next: string) =>
+    updateSite((current) => updateChineseValue(current, path, next));
+
   return (
     <div className="translation-field">
       <span>{label}</span>
       <div className="translation-pair">
-        <Field label="英文">
+        <Field label={t.englishContent}>
           {area ? (
-            <TextArea value={sourceValue} onChange={(next) => onSourceChange(path, next)} />
+            <TextArea value={sourceValue} onChange={updateEnglish} />
           ) : (
-            <TextInput value={sourceValue} onChange={(next) => onSourceChange(path, next)} />
+            <TextInput value={sourceValue} onChange={updateEnglish} />
           )}
         </Field>
-        <Field label="中文">
+        <Field label={t.chineseContent}>
           {area ? (
-            <TextArea value={value} onChange={(next) => onChange(path, next)} />
+            <TextArea value={translationValue} onChange={updateChinese} />
           ) : (
-            <TextInput value={value} onChange={(next) => onChange(path, next)} />
+            <TextInput value={translationValue} onChange={updateChinese} />
           )}
         </Field>
       </div>
@@ -821,15 +583,16 @@ function TranslationInput({
 }
 
 export function ProjectsEditor({
-  projects,
+  data,
   updateSite,
   language,
 }: {
-  projects: ProjectItem[];
+  data: SiteData;
   updateSite: UpdateSite;
   language: Language;
 }) {
   const t = editorCopy[language];
+  const projects = data.projects;
   const updateProject = (id: string, patch: Partial<ProjectItem>) =>
     updateSite((data) => ({
       ...data,
@@ -903,18 +666,30 @@ export function ProjectsEditor({
               </div>
             </div>
             <div className="form-grid">
-              <Field label={t.title}>
-                <TextInput value={project.title} onChange={(title) => updateProject(project.id, { title })} />
-              </Field>
-              <Field label={t.category}>
-                <TextInput
-                  value={project.category}
-                  onChange={(category) => updateProject(project.id, { category })}
-                />
-              </Field>
-              <Field label={t.status}>
-                <TextInput value={project.status} onChange={(status) => updateProject(project.id, { status })} />
-              </Field>
+              <BilingualField
+                label={t.title}
+                language={language}
+                path={`projects.${project.id}.title`}
+                sourceValue={project.title}
+                translationValue={chineseValue(data, `projects.${project.id}.title`)}
+                updateSite={updateSite}
+              />
+              <BilingualField
+                label={t.category}
+                language={language}
+                path={`projects.${project.id}.category`}
+                sourceValue={project.category}
+                translationValue={chineseValue(data, `projects.${project.id}.category`)}
+                updateSite={updateSite}
+              />
+              <BilingualField
+                label={t.status}
+                language={language}
+                path={`projects.${project.id}.status`}
+                sourceValue={project.status}
+                translationValue={chineseValue(data, `projects.${project.id}.status`)}
+                updateSite={updateSite}
+              />
               <Field label={t.year}>
                 <TextInput value={project.year} onChange={(year) => updateProject(project.id, { year })} />
               </Field>
@@ -922,12 +697,15 @@ export function ProjectsEditor({
                 <TextInput value={project.link} onChange={(link) => updateProject(project.id, { link })} />
               </Field>
             </div>
-            <Field label={t.description}>
-              <TextArea
-                value={project.description}
-                onChange={(description) => updateProject(project.id, { description })}
-              />
-            </Field>
+            <BilingualField
+              area
+              label={t.description}
+              language={language}
+              path={`projects.${project.id}.description`}
+              sourceValue={project.description}
+              translationValue={chineseValue(data, `projects.${project.id}.description`)}
+              updateSite={updateSite}
+            />
             <div className="toggle-row">
               <Toggle
                 checked={project.visible}
@@ -948,15 +726,16 @@ export function ProjectsEditor({
 }
 
 export function ExperienceEditor({
-  experience,
+  data,
   updateSite,
   language,
 }: {
-  experience: ExperienceItem[];
+  data: SiteData;
   updateSite: UpdateSite;
   language: Language;
 }) {
   const t = editorCopy[language];
+  const experience = data.experience;
   const updateExperience = (id: string, patch: Partial<ExperienceItem>) =>
     updateSite((data) => ({
       ...data,
@@ -998,38 +777,43 @@ export function ExperienceEditor({
       renderItem={(item) => (
         <>
           <div className="form-grid">
-            <Field label={t.role}>
-              <TextInput value={item.role} onChange={(role) => updateExperience(item.id, { role })} />
-            </Field>
-            <Field label={t.organization}>
-              <TextInput
-                value={item.organization}
-                onChange={(organization) => updateExperience(item.id, { organization })}
-              />
-            </Field>
+            <BilingualField
+              label={t.role}
+              language={language}
+              path={`experience.${item.id}.role`}
+              sourceValue={item.role}
+              translationValue={chineseValue(data, `experience.${item.id}.role`)}
+              updateSite={updateSite}
+            />
+            <BilingualField
+              label={t.organization}
+              language={language}
+              path={`experience.${item.id}.organization`}
+              sourceValue={item.organization}
+              translationValue={chineseValue(data, `experience.${item.id}.organization`)}
+              updateSite={updateSite}
+            />
             <Field label={t.period}>
               <TextInput value={item.period} onChange={(period) => updateExperience(item.id, { period })} />
             </Field>
           </div>
-          <Field label={t.description}>
-            <TextArea
-              value={item.description}
-              onChange={(description) => updateExperience(item.id, { description })}
-            />
-          </Field>
-          <Field label={t.highlights}>
-            <TextInput
-              value={item.highlights.join(", ")}
-              onChange={(value) =>
-                updateExperience(item.id, {
-                  highlights: value
-                    .split(",")
-                    .map((entry) => entry.trim())
-                    .filter(Boolean),
-                })
-              }
-            />
-          </Field>
+          <BilingualField
+            area
+            label={t.description}
+            language={language}
+            path={`experience.${item.id}.description`}
+            sourceValue={item.description}
+            translationValue={chineseValue(data, `experience.${item.id}.description`)}
+            updateSite={updateSite}
+          />
+          <BilingualField
+            label={t.highlights}
+            language={language}
+            path={`experience.${item.id}.highlights`}
+            sourceValue={item.highlights.join(", ")}
+            translationValue={chineseValue(data, `experience.${item.id}.highlights`)}
+            updateSite={updateSite}
+          />
           <Toggle
             checked={item.visible}
             label={t.visible}
@@ -1042,15 +826,16 @@ export function ExperienceEditor({
 }
 
 export function WritingEditor({
-  writing,
+  data,
   updateSite,
   language,
 }: {
-  writing: WritingItem[];
+  data: SiteData;
   updateSite: UpdateSite;
   language: Language;
 }) {
   const t = editorCopy[language];
+  const writing = data.writing;
   const updateWriting = (id: string, patch: Partial<WritingItem>) =>
     updateSite((data) => ({
       ...data,
@@ -1089,12 +874,22 @@ export function WritingEditor({
       renderItem={(item) => (
         <>
           <div className="form-grid">
-            <Field label={t.title}>
-              <TextInput value={item.title} onChange={(title) => updateWriting(item.id, { title })} />
-            </Field>
-            <Field label={t.tag}>
-              <TextInput value={item.tag} onChange={(tag) => updateWriting(item.id, { tag })} />
-            </Field>
+            <BilingualField
+              label={t.title}
+              language={language}
+              path={`writing.${item.id}.title`}
+              sourceValue={item.title}
+              translationValue={chineseValue(data, `writing.${item.id}.title`)}
+              updateSite={updateSite}
+            />
+            <BilingualField
+              label={t.tag}
+              language={language}
+              path={`writing.${item.id}.tag`}
+              sourceValue={item.tag}
+              translationValue={chineseValue(data, `writing.${item.id}.tag`)}
+              updateSite={updateSite}
+            />
             <Field label={t.date}>
               <TextInput value={item.date} onChange={(date) => updateWriting(item.id, { date })} />
             </Field>
@@ -1102,9 +897,15 @@ export function WritingEditor({
               <TextInput value={item.url} onChange={(url) => updateWriting(item.id, { url })} />
             </Field>
           </div>
-          <Field label={t.summary}>
-            <TextArea value={item.summary} onChange={(summary) => updateWriting(item.id, { summary })} />
-          </Field>
+          <BilingualField
+            area
+            label={t.summary}
+            language={language}
+            path={`writing.${item.id}.summary`}
+            sourceValue={item.summary}
+            translationValue={chineseValue(data, `writing.${item.id}.summary`)}
+            updateSite={updateSite}
+          />
           <Toggle
             checked={item.published}
             label={t.published}
@@ -1117,15 +918,16 @@ export function WritingEditor({
 }
 
 export function MediaEditor({
-  media,
+  data,
   updateSite,
   language,
 }: {
-  media: MediaItem[];
+  data: SiteData;
   updateSite: UpdateSite;
   language: Language;
 }) {
   const t = editorCopy[language];
+  const media = data.media;
   const updateMedia = (id: string, patch: Partial<MediaItem>) =>
     updateSite((data) => ({
       ...data,
@@ -1163,9 +965,14 @@ export function MediaEditor({
       renderItem={(item) => (
         <>
           <div className="form-grid">
-            <Field label={t.title}>
-              <TextInput value={item.title} onChange={(title) => updateMedia(item.id, { title })} />
-            </Field>
+            <BilingualField
+              label={t.title}
+              language={language}
+              path={`media.${item.id}.title`}
+              sourceValue={item.title}
+              translationValue={chineseValue(data, `media.${item.id}.title`)}
+              updateSite={updateSite}
+            />
             <Field label={t.type}>
               <Select
                 value={item.type}
@@ -1182,9 +989,15 @@ export function MediaEditor({
               <TextInput value={item.url} onChange={(url) => updateMedia(item.id, { url })} />
             </Field>
           </div>
-          <Field label={t.caption}>
-            <TextArea value={item.caption} onChange={(caption) => updateMedia(item.id, { caption })} />
-          </Field>
+          <BilingualField
+            area
+            label={t.caption}
+            language={language}
+            path={`media.${item.id}.caption`}
+            sourceValue={item.caption}
+            translationValue={chineseValue(data, `media.${item.id}.caption`)}
+            updateSite={updateSite}
+          />
           <Toggle
             checked={item.visible}
             label={t.visible}
@@ -1197,15 +1010,16 @@ export function MediaEditor({
 }
 
 export function ServicesEditor({
-  services,
+  data,
   updateSite,
   language,
 }: {
-  services: ServiceItem[];
+  data: SiteData;
   updateSite: UpdateSite;
   language: Language;
 }) {
   const t = editorCopy[language];
+  const services = data.services;
   const updateService = (id: string, patch: Partial<ServiceItem>) =>
     updateSite((data) => ({
       ...data,
@@ -1243,15 +1057,23 @@ export function ServicesEditor({
       }
       renderItem={(item) => (
         <>
-          <Field label={t.title}>
-            <TextInput value={item.title} onChange={(title) => updateService(item.id, { title })} />
-          </Field>
-          <Field label={t.description}>
-            <TextArea
-              value={item.description}
-              onChange={(description) => updateService(item.id, { description })}
-            />
-          </Field>
+          <BilingualField
+            label={t.title}
+            language={language}
+            path={`services.${item.id}.title`}
+            sourceValue={item.title}
+            translationValue={chineseValue(data, `services.${item.id}.title`)}
+            updateSite={updateSite}
+          />
+          <BilingualField
+            area
+            label={t.description}
+            language={language}
+            path={`services.${item.id}.description`}
+            sourceValue={item.description}
+            translationValue={chineseValue(data, `services.${item.id}.description`)}
+            updateSite={updateSite}
+          />
           <Toggle
             checked={item.visible}
             label={t.visible}
@@ -1264,15 +1086,16 @@ export function ServicesEditor({
 }
 
 export function LinksEditor({
-  links,
+  data,
   updateSite,
   language,
 }: {
-  links: LinkItem[];
+  data: SiteData;
   updateSite: UpdateSite;
   language: Language;
 }) {
   const t = editorCopy[language];
+  const links = data.links;
   const updateLink = (id: string, patch: Partial<LinkItem>) =>
     updateSite((data) => ({
       ...data,
@@ -1300,9 +1123,14 @@ export function LinksEditor({
       renderItem={(item) => (
         <>
           <div className="form-grid">
-            <Field label={t.label}>
-              <TextInput value={item.label} onChange={(label) => updateLink(item.id, { label })} />
-            </Field>
+            <BilingualField
+              label={t.label}
+              language={language}
+              path={`links.${item.id}.label`}
+              sourceValue={item.label}
+              translationValue={chineseValue(data, `links.${item.id}.label`)}
+              updateSite={updateSite}
+            />
             <Field label={t.url}>
               <TextInput value={item.url} onChange={(url) => updateLink(item.id, { url })} />
             </Field>
@@ -1384,30 +1212,47 @@ export function AppearanceEditor({
 }
 
 export function SeoEditor({
-  seo,
+  data,
   updateSite,
   language,
 }: {
-  seo: SeoData;
+  data: SiteData;
   updateSite: UpdateSite;
   language: Language;
 }) {
   const t = editorCopy[language];
+  const seo = data.seo;
   const update = (patch: Partial<SeoData>) =>
     updateSite((data) => ({ ...data, seo: { ...data.seo, ...patch } }));
 
   return (
     <EditorBlock title={t.seo}>
-      <Field label={t.pageTitle}>
-        <TextInput value={seo.title} onChange={(title) => update({ title })} />
-      </Field>
-      <Field label={t.description}>
-        <TextArea value={seo.description} onChange={(description) => update({ description })} />
-      </Field>
+      <BilingualField
+        label={t.pageTitle}
+        language={language}
+        path="seo.title"
+        sourceValue={seo.title}
+        translationValue={chineseValue(data, "seo.title")}
+        updateSite={updateSite}
+      />
+      <BilingualField
+        area
+        label={t.description}
+        language={language}
+        path="seo.description"
+        sourceValue={seo.description}
+        translationValue={chineseValue(data, "seo.description")}
+        updateSite={updateSite}
+      />
       <div className="form-grid">
-        <Field label={t.keywords}>
-          <TextInput value={seo.keywords} onChange={(keywords) => update({ keywords })} />
-        </Field>
+        <BilingualField
+          label={t.keywords}
+          language={language}
+          path="seo.keywords"
+          sourceValue={seo.keywords}
+          translationValue={chineseValue(data, "seo.keywords")}
+          updateSite={updateSite}
+        />
         <Field label={t.openGraphImage}>
           <TextInput value={seo.ogImage} onChange={(ogImage) => update({ ogImage })} />
         </Field>

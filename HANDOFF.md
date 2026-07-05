@@ -5,7 +5,7 @@
 - Local path: `/Users/yzh/AI/CodexProject/Others/premium-personal-site`
 - GitHub repo: `https://github.com/yzhiheng05/premium-personal-site`
 - Main branch is synced.
-- Latest known commit: `32c72db Support editable bilingual content`
+- Latest commit: run `git log -1 --oneline` in the project.
 - Project type: React + Vite personal website with a hidden admin console.
 
 ## User Intent
@@ -18,7 +18,7 @@ Recent focus:
 - It was changed to support Chinese and English switching.
 - The user asked whether translation is online/free automatic translation or stored in-project.
 - Current implementation uses stored in-project bilingual content, not online translation.
-- Editable bilingual content has now been added: English is edited in normal content tabs, Chinese is edited in the `中文内容 / Translations` admin tab.
+- Editable bilingual content is now edited side by side in the normal content tabs. The `翻译检查 / Translation Check` tab only reports Chinese coverage and missing translation paths.
 
 ## Current Behavior
 
@@ -63,12 +63,13 @@ Main files:
   - Merges missing default Chinese translations.
 
 - `src/components/admin/AdminPanel.tsx`
-  - Adds the `translations` admin tab.
+  - Adds the `translations` admin tab as a translation coverage/check view.
 
 - `src/components/admin/editors.tsx`
-  - Contains `TranslationEditor`.
-  - English/base fields are edited through existing normal editors.
-  - Chinese fields are edited through the translation editor.
+  - Contains bilingual field editors for language-specific content.
+  - English/base values and Chinese translation values are edited side by side in the normal content tabs.
+  - Shared fields such as dates, URLs, visibility, ordering, media type, theme, and accent remain single-value fields.
+  - Contains `TranslationEditor` for coverage reporting only.
 
 ## How Editing Translation Works
 
@@ -88,8 +89,8 @@ When the public site is in Chinese, `localizeSiteData()` replaces supported Engl
 
 For long text such as personal evaluations, biographies, or blog summaries:
 
-- Write/edit the English version in the normal admin tab.
-- Write/edit the Chinese version in `中文内容 / Translations`.
+- Write/edit English and Chinese side by side in the relevant content tab.
+- Use `翻译检查 / Translation Check` to find missing Chinese fields.
 - The app does not call external translation APIs or free online translation.
 
 This is simpler, more stable, privacy-friendly, and avoids unpredictable machine translation quality. If the user later wants automatic AI translation, that should be implemented as a deliberate new feature, ideally with explicit provider choice, cost handling, and review-before-save behavior.
@@ -181,8 +182,8 @@ https://github.com/yzhiheng05/premium-personal-site
 - 后台密码：atelier。
 - 默认中文，支持中英文切换。
 - 双语不是联网翻译，是项目内存储的固定/可编辑内容。
-- 英文内容在普通后台内容页编辑。
-- 中文内容在后台 `中文内容 / Translations` 页编辑。
+- 中英文内容在普通后台内容页并排编辑。
+- 后台 `翻译检查 / Translation Check` 页只检查中文覆盖率和缺失路径。
 - 数据保存在 localStorage，支持 JSON 导入导出。
 - 当前没有后端数据库，也没有真正的服务端认证。
 

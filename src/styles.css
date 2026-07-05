@@ -1095,6 +1095,12 @@ select:focus {
   border-radius: 8px;
 }
 
+.admin-row .translation-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
 .json-preview {
   max-height: 340px;
   overflow: auto;
