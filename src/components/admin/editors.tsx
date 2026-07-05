@@ -20,6 +20,159 @@ import { Button, EditorBlock, Field, Select, TextArea, TextInput, Toggle } from 
 
 type UpdateSite = (updater: (data: SiteData) => SiteData) => void;
 
+const editorCopy = {
+  en: {
+    profile: "Profile",
+    sections: "Sections",
+    projects: "Projects",
+    experience: "Experience",
+    writing: "Writing",
+    media: "Media",
+    services: "Services",
+    links: "Links",
+    appearance: "Appearance",
+    data: "Data",
+    seo: "SEO and Metadata",
+    add: "Add",
+    addRole: "Add role",
+    addNote: "Add note",
+    addMedia: "Add media",
+    addService: "Add service",
+    addLink: "Add link",
+    up: "Up",
+    down: "Down",
+    delete: "Delete",
+    visible: "Visible",
+    featured: "Featured",
+    published: "Published",
+    name: "Name",
+    role: "Role",
+    location: "Location",
+    email: "Email",
+    availability: "Availability",
+    heroImageUrl: "Hero image URL",
+    tagline: "Tagline",
+    biography: "Biography",
+    title: "Title",
+    category: "Category",
+    status: "Status",
+    year: "Year",
+    link: "Link",
+    description: "Description",
+    organization: "Organization",
+    period: "Period",
+    highlights: "Highlights, comma separated",
+    tag: "Tag",
+    date: "Date",
+    url: "URL",
+    summary: "Summary",
+    type: "Type",
+    caption: "Caption",
+    label: "Label",
+    defaultLanguage: "Default language",
+    theme: "Theme",
+    accent: "Accent",
+    density: "Density",
+    motion: "Motion",
+    pageTitle: "Page title",
+    keywords: "Keywords",
+    openGraphImage: "Open Graph image",
+    exportJson: "Export JSON",
+    importJson: "Import JSON",
+    reset: "Reset",
+    importFailed: "Import failed.",
+    options: {
+      english: "English",
+      image: "Image",
+      talk: "Talk",
+      press: "Press",
+      case: "Case",
+      noir: "Noir",
+      paper: "Paper",
+      system: "System",
+      calm: "Calm",
+      compact: "Compact",
+      full: "Full",
+      reduced: "Reduced",
+    },
+  },
+  zh: {
+    profile: "个人资料",
+    sections: "页面模块",
+    projects: "项目",
+    experience: "经历",
+    writing: "文章",
+    media: "媒体",
+    services: "服务",
+    links: "链接",
+    appearance: "外观",
+    data: "数据",
+    seo: "SEO 与元数据",
+    add: "添加",
+    addRole: "添加经历",
+    addNote: "添加文章",
+    addMedia: "添加媒体",
+    addService: "添加服务",
+    addLink: "添加链接",
+    up: "上移",
+    down: "下移",
+    delete: "删除",
+    visible: "显示",
+    featured: "精选",
+    published: "已发布",
+    name: "姓名",
+    role: "身份",
+    location: "地点",
+    email: "邮箱",
+    availability: "可合作状态",
+    heroImageUrl: "首屏图片 URL",
+    tagline: "简介短句",
+    biography: "个人介绍",
+    title: "标题",
+    category: "类别",
+    status: "状态",
+    year: "年份",
+    link: "链接",
+    description: "描述",
+    organization: "机构",
+    period: "时间",
+    highlights: "亮点，逗号分隔",
+    tag: "标签",
+    date: "日期",
+    url: "URL",
+    summary: "摘要",
+    type: "类型",
+    caption: "说明",
+    label: "标签",
+    defaultLanguage: "默认语言",
+    theme: "主题",
+    accent: "强调色",
+    density: "密度",
+    motion: "动效",
+    pageTitle: "页面标题",
+    keywords: "关键词",
+    openGraphImage: "Open Graph 图片",
+    exportJson: "导出 JSON",
+    importJson: "导入 JSON",
+    reset: "重置",
+    importFailed: "导入失败。",
+    options: {
+      english: "英文",
+      image: "图片",
+      talk: "演讲",
+      press: "报道",
+      case: "案例",
+      noir: "深色",
+      paper: "浅纸",
+      system: "跟随系统",
+      calm: "舒展",
+      compact: "紧凑",
+      full: "完整",
+      reduced: "减少",
+    },
+  },
+} as const;
+
 function uid(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
@@ -42,48 +195,60 @@ function downloadText(filename: string, text: string) {
   URL.revokeObjectURL(url);
 }
 
+function formatImportError(message: string, language: Language) {
+  if (language === "en") return message;
+  if (message === "Import failed: JSON is not valid.") return "导入失败：JSON 格式不正确。";
+  if (message === "Import failed: this file is not compatible site data.") {
+    return "导入失败：这个文件不是兼容的站点数据。";
+  }
+  return message.replace("Import failed", "导入失败");
+}
+
 export function ProfileEditor({
   profile,
   updateSite,
+  language,
 }: {
   profile: ProfileData;
   updateSite: UpdateSite;
+  language: Language;
 }) {
+  const t = editorCopy[language];
   const update = (patch: Partial<ProfileData>) =>
     updateSite((data) => ({ ...data, profile: { ...data.profile, ...patch } }));
 
   return (
-    <EditorBlock title="Profile">
+    <EditorBlock title={t.profile}>
       <div className="form-grid">
-        <Field label="Name">
+        <Field label={t.name}>
           <TextInput value={profile.name} onChange={(name) => update({ name })} />
         </Field>
-        <Field label="Role">
+        <Field label={t.role}>
           <TextInput value={profile.role} onChange={(role) => update({ role })} />
         </Field>
-        <Field label="Location">
+        <Field label={t.location}>
           <TextInput value={profile.location} onChange={(location) => update({ location })} />
         </Field>
-        <Field label="Email">
+        <Field label={t.email}>
           <TextInput value={profile.email} onChange={(email) => update({ email })} />
         </Field>
-        <Field label="Availability">
+        <Field label={t.availability}>
           <TextInput
             value={profile.availability}
             onChange={(availability) => update({ availability })}
           />
         </Field>
-        <Field label="Hero image URL">
+        <Field label={t.heroImageUrl}>
           <TextInput
             value={profile.heroImageUrl}
             onChange={(heroImageUrl) => update({ heroImageUrl })}
           />
         </Field>
       </div>
-      <Field label="Tagline">
+      <Field label={t.tagline}>
         <TextArea value={profile.tagline} onChange={(tagline) => update({ tagline })} />
       </Field>
-      <Field label="Biography">
+      <Field label={t.biography}>
         <TextArea value={profile.biography} onChange={(biography) => update({ biography })} />
       </Field>
     </EditorBlock>
@@ -93,10 +258,13 @@ export function ProfileEditor({
 export function SectionsEditor({
   sections,
   updateSite,
+  language,
 }: {
   sections: SectionSetting[];
   updateSite: UpdateSite;
+  language: Language;
 }) {
+  const t = editorCopy[language];
   const ordered = [...sections].sort((a, b) => a.order - b.order);
   const commitOrder = (next: SectionSetting[]) =>
     updateSite((data) => ({
@@ -105,7 +273,7 @@ export function SectionsEditor({
     }));
 
   return (
-    <EditorBlock title="Sections">
+    <EditorBlock title={t.sections}>
       <div className="admin-list">
         {ordered.map((section, index) => (
           <div className="admin-row" key={section.id}>
@@ -113,7 +281,7 @@ export function SectionsEditor({
             <div className="row-actions">
               <Toggle
                 checked={section.visible}
-                label="Visible"
+                label={t.visible}
                 onChange={(visible) =>
                   updateSite((data) => ({
                     ...data,
@@ -123,8 +291,8 @@ export function SectionsEditor({
                   }))
                 }
               />
-              <Button onClick={() => commitOrder(moveItem(ordered, index, -1))}>Up</Button>
-              <Button onClick={() => commitOrder(moveItem(ordered, index, 1))}>Down</Button>
+              <Button onClick={() => commitOrder(moveItem(ordered, index, -1))}>{t.up}</Button>
+              <Button onClick={() => commitOrder(moveItem(ordered, index, 1))}>{t.down}</Button>
             </div>
           </div>
         ))}
@@ -462,7 +630,7 @@ function TranslationInput({
   area?: boolean;
 }) {
   return (
-    <Field label={label} hint={`English: ${source}`}>
+    <Field label={label} hint={`英文原文：${source}`}>
       {area ? (
         <TextArea value={value} onChange={(next) => onChange(path, next)} />
       ) : (
@@ -475,10 +643,13 @@ function TranslationInput({
 export function ProjectsEditor({
   projects,
   updateSite,
+  language,
 }: {
   projects: ProjectItem[];
   updateSite: UpdateSite;
+  language: Language;
 }) {
+  const t = editorCopy[language];
   const updateProject = (id: string, patch: Partial<ProjectItem>) =>
     updateSite((data) => ({
       ...data,
@@ -489,7 +660,7 @@ export function ProjectsEditor({
 
   return (
     <EditorBlock
-      title="Projects"
+      title={t.projects}
       actions={
         <Button
           variant="primary"
@@ -513,7 +684,7 @@ export function ProjectsEditor({
             }))
           }
         >
-          <Plus size={15} /> Add
+          <Plus size={15} /> {t.add}
         </Button>
       }
     >
@@ -528,18 +699,18 @@ export function ProjectsEditor({
                     updateSite((data) => ({ ...data, projects: moveItem(data.projects, index, -1) }))
                   }
                 >
-                  Up
+                  {t.up}
                 </Button>
                 <Button
                   onClick={() =>
                     updateSite((data) => ({ ...data, projects: moveItem(data.projects, index, 1) }))
                   }
                 >
-                  Down
+                  {t.down}
                 </Button>
                 <Button
                   variant="danger"
-                  ariaLabel={`Delete ${project.title}`}
+                  ariaLabel={`${t.delete} ${project.title}`}
                   onClick={() =>
                     updateSite((data) => ({
                       ...data,
@@ -552,26 +723,26 @@ export function ProjectsEditor({
               </div>
             </div>
             <div className="form-grid">
-              <Field label="Title">
+              <Field label={t.title}>
                 <TextInput value={project.title} onChange={(title) => updateProject(project.id, { title })} />
               </Field>
-              <Field label="Category">
+              <Field label={t.category}>
                 <TextInput
                   value={project.category}
                   onChange={(category) => updateProject(project.id, { category })}
                 />
               </Field>
-              <Field label="Status">
+              <Field label={t.status}>
                 <TextInput value={project.status} onChange={(status) => updateProject(project.id, { status })} />
               </Field>
-              <Field label="Year">
+              <Field label={t.year}>
                 <TextInput value={project.year} onChange={(year) => updateProject(project.id, { year })} />
               </Field>
-              <Field label="Link">
+              <Field label={t.link}>
                 <TextInput value={project.link} onChange={(link) => updateProject(project.id, { link })} />
               </Field>
             </div>
-            <Field label="Description">
+            <Field label={t.description}>
               <TextArea
                 value={project.description}
                 onChange={(description) => updateProject(project.id, { description })}
@@ -580,12 +751,12 @@ export function ProjectsEditor({
             <div className="toggle-row">
               <Toggle
                 checked={project.visible}
-                label="Visible"
+                label={t.visible}
                 onChange={(visible) => updateProject(project.id, { visible })}
               />
               <Toggle
                 checked={project.featured}
-                label="Featured"
+                label={t.featured}
                 onChange={(featured) => updateProject(project.id, { featured })}
               />
             </div>
@@ -599,10 +770,13 @@ export function ProjectsEditor({
 export function ExperienceEditor({
   experience,
   updateSite,
+  language,
 }: {
   experience: ExperienceItem[];
   updateSite: UpdateSite;
+  language: Language;
 }) {
+  const t = editorCopy[language];
   const updateExperience = (id: string, patch: Partial<ExperienceItem>) =>
     updateSite((data) => ({
       ...data,
@@ -611,9 +785,10 @@ export function ExperienceEditor({
 
   return (
     <CollectionEditor
-      title="Experience"
+      title={t.experience}
       items={experience}
-      addLabel="Add role"
+      addLabel={t.addRole}
+      language={language}
       addItem={() =>
         updateSite((data) => ({
           ...data,
@@ -643,26 +818,26 @@ export function ExperienceEditor({
       renderItem={(item) => (
         <>
           <div className="form-grid">
-            <Field label="Role">
+            <Field label={t.role}>
               <TextInput value={item.role} onChange={(role) => updateExperience(item.id, { role })} />
             </Field>
-            <Field label="Organization">
+            <Field label={t.organization}>
               <TextInput
                 value={item.organization}
                 onChange={(organization) => updateExperience(item.id, { organization })}
               />
             </Field>
-            <Field label="Period">
+            <Field label={t.period}>
               <TextInput value={item.period} onChange={(period) => updateExperience(item.id, { period })} />
             </Field>
           </div>
-          <Field label="Description">
+          <Field label={t.description}>
             <TextArea
               value={item.description}
               onChange={(description) => updateExperience(item.id, { description })}
             />
           </Field>
-          <Field label="Highlights, comma separated">
+          <Field label={t.highlights}>
             <TextInput
               value={item.highlights.join(", ")}
               onChange={(value) =>
@@ -677,7 +852,7 @@ export function ExperienceEditor({
           </Field>
           <Toggle
             checked={item.visible}
-            label="Visible"
+            label={t.visible}
             onChange={(visible) => updateExperience(item.id, { visible })}
           />
         </>
@@ -689,10 +864,13 @@ export function ExperienceEditor({
 export function WritingEditor({
   writing,
   updateSite,
+  language,
 }: {
   writing: WritingItem[];
   updateSite: UpdateSite;
+  language: Language;
 }) {
+  const t = editorCopy[language];
   const updateWriting = (id: string, patch: Partial<WritingItem>) =>
     updateSite((data) => ({
       ...data,
@@ -701,9 +879,10 @@ export function WritingEditor({
 
   return (
     <CollectionEditor
-      title="Writing"
+      title={t.writing}
       items={writing}
-      addLabel="Add note"
+      addLabel={t.addNote}
+      language={language}
       addItem={() =>
         updateSite((data) => ({
           ...data,
@@ -730,25 +909,25 @@ export function WritingEditor({
       renderItem={(item) => (
         <>
           <div className="form-grid">
-            <Field label="Title">
+            <Field label={t.title}>
               <TextInput value={item.title} onChange={(title) => updateWriting(item.id, { title })} />
             </Field>
-            <Field label="Tag">
+            <Field label={t.tag}>
               <TextInput value={item.tag} onChange={(tag) => updateWriting(item.id, { tag })} />
             </Field>
-            <Field label="Date">
+            <Field label={t.date}>
               <TextInput value={item.date} onChange={(date) => updateWriting(item.id, { date })} />
             </Field>
-            <Field label="URL">
+            <Field label={t.url}>
               <TextInput value={item.url} onChange={(url) => updateWriting(item.id, { url })} />
             </Field>
           </div>
-          <Field label="Summary">
+          <Field label={t.summary}>
             <TextArea value={item.summary} onChange={(summary) => updateWriting(item.id, { summary })} />
           </Field>
           <Toggle
             checked={item.published}
-            label="Published"
+            label={t.published}
             onChange={(published) => updateWriting(item.id, { published })}
           />
         </>
@@ -760,10 +939,13 @@ export function WritingEditor({
 export function MediaEditor({
   media,
   updateSite,
+  language,
 }: {
   media: MediaItem[];
   updateSite: UpdateSite;
+  language: Language;
 }) {
+  const t = editorCopy[language];
   const updateMedia = (id: string, patch: Partial<MediaItem>) =>
     updateSite((data) => ({
       ...data,
@@ -772,9 +954,10 @@ export function MediaEditor({
 
   return (
     <CollectionEditor
-      title="Media"
+      title={t.media}
       items={media}
-      addLabel="Add media"
+      addLabel={t.addMedia}
+      language={language}
       addItem={() =>
         updateSite((data) => ({
           ...data,
@@ -800,31 +983,31 @@ export function MediaEditor({
       renderItem={(item) => (
         <>
           <div className="form-grid">
-            <Field label="Title">
+            <Field label={t.title}>
               <TextInput value={item.title} onChange={(title) => updateMedia(item.id, { title })} />
             </Field>
-            <Field label="Type">
+            <Field label={t.type}>
               <Select
                 value={item.type}
                 options={[
-                  { label: "Image", value: "image" },
-                  { label: "Talk", value: "talk" },
-                  { label: "Press", value: "press" },
-                  { label: "Case", value: "case" },
+                  { label: t.options.image, value: "image" },
+                  { label: t.options.talk, value: "talk" },
+                  { label: t.options.press, value: "press" },
+                  { label: t.options.case, value: "case" },
                 ]}
                 onChange={(type) => updateMedia(item.id, { type: type as MediaItem["type"] })}
               />
             </Field>
-            <Field label="URL">
+            <Field label={t.url}>
               <TextInput value={item.url} onChange={(url) => updateMedia(item.id, { url })} />
             </Field>
           </div>
-          <Field label="Caption">
+          <Field label={t.caption}>
             <TextArea value={item.caption} onChange={(caption) => updateMedia(item.id, { caption })} />
           </Field>
           <Toggle
             checked={item.visible}
-            label="Visible"
+            label={t.visible}
             onChange={(visible) => updateMedia(item.id, { visible })}
           />
         </>
@@ -836,10 +1019,13 @@ export function MediaEditor({
 export function ServicesEditor({
   services,
   updateSite,
+  language,
 }: {
   services: ServiceItem[];
   updateSite: UpdateSite;
+  language: Language;
 }) {
+  const t = editorCopy[language];
   const updateService = (id: string, patch: Partial<ServiceItem>) =>
     updateSite((data) => ({
       ...data,
@@ -848,9 +1034,10 @@ export function ServicesEditor({
 
   return (
     <CollectionEditor
-      title="Services"
+      title={t.services}
       items={services}
-      addLabel="Add service"
+      addLabel={t.addService}
+      language={language}
       addItem={() =>
         updateSite((data) => ({
           ...data,
@@ -876,10 +1063,10 @@ export function ServicesEditor({
       }
       renderItem={(item) => (
         <>
-          <Field label="Title">
+          <Field label={t.title}>
             <TextInput value={item.title} onChange={(title) => updateService(item.id, { title })} />
           </Field>
-          <Field label="Description">
+          <Field label={t.description}>
             <TextArea
               value={item.description}
               onChange={(description) => updateService(item.id, { description })}
@@ -887,7 +1074,7 @@ export function ServicesEditor({
           </Field>
           <Toggle
             checked={item.visible}
-            label="Visible"
+            label={t.visible}
             onChange={(visible) => updateService(item.id, { visible })}
           />
         </>
@@ -896,7 +1083,16 @@ export function ServicesEditor({
   );
 }
 
-export function LinksEditor({ links, updateSite }: { links: LinkItem[]; updateSite: UpdateSite }) {
+export function LinksEditor({
+  links,
+  updateSite,
+  language,
+}: {
+  links: LinkItem[];
+  updateSite: UpdateSite;
+  language: Language;
+}) {
+  const t = editorCopy[language];
   const updateLink = (id: string, patch: Partial<LinkItem>) =>
     updateSite((data) => ({
       ...data,
@@ -905,9 +1101,10 @@ export function LinksEditor({ links, updateSite }: { links: LinkItem[]; updateSi
 
   return (
     <CollectionEditor
-      title="Links"
+      title={t.links}
       items={links}
-      addLabel="Add link"
+      addLabel={t.addLink}
+      language={language}
       addItem={() =>
         updateSite((data) => ({
           ...data,
@@ -923,16 +1120,16 @@ export function LinksEditor({ links, updateSite }: { links: LinkItem[]; updateSi
       renderItem={(item) => (
         <>
           <div className="form-grid">
-            <Field label="Label">
+            <Field label={t.label}>
               <TextInput value={item.label} onChange={(label) => updateLink(item.id, { label })} />
             </Field>
-            <Field label="URL">
+            <Field label={t.url}>
               <TextInput value={item.url} onChange={(url) => updateLink(item.id, { url })} />
             </Field>
           </div>
           <Toggle
             checked={item.visible}
-            label="Visible"
+            label={t.visible}
             onChange={(visible) => updateLink(item.id, { visible })}
           />
         </>
@@ -950,52 +1147,53 @@ export function AppearanceEditor({
   updateSite: UpdateSite;
   language: Language;
 }) {
+  const t = editorCopy[language];
   const update = (patch: Partial<AppearanceData>) =>
     updateSite((data) => ({ ...data, appearance: { ...data.appearance, ...patch } }));
 
   return (
-    <EditorBlock title="Appearance">
+    <EditorBlock title={t.appearance}>
       <div className="form-grid">
-        <Field label={language === "zh" ? "默认语言" : "Default language"}>
+        <Field label={t.defaultLanguage}>
           <Select
             value={appearance.language}
             options={[
               { label: "中文", value: "zh" },
-              { label: "English", value: "en" },
+              { label: t.options.english, value: "en" },
             ]}
             onChange={(nextLanguage) => update({ language: nextLanguage as Language })}
           />
         </Field>
-        <Field label="Theme">
+        <Field label={t.theme}>
           <Select
             value={appearance.theme}
             options={[
-              { label: "Noir", value: "noir" },
-              { label: "Paper", value: "paper" },
-              { label: "System", value: "system" },
+              { label: t.options.noir, value: "noir" },
+              { label: t.options.paper, value: "paper" },
+              { label: t.options.system, value: "system" },
             ]}
             onChange={(theme) => update({ theme: theme as AppearanceData["theme"] })}
           />
         </Field>
-        <Field label="Accent">
+        <Field label={t.accent}>
           <TextInput value={appearance.accent} onChange={(accent) => update({ accent })} />
         </Field>
-        <Field label="Density">
+        <Field label={t.density}>
           <Select
             value={appearance.density}
             options={[
-              { label: "Calm", value: "calm" },
-              { label: "Compact", value: "compact" },
+              { label: t.options.calm, value: "calm" },
+              { label: t.options.compact, value: "compact" },
             ]}
             onChange={(density) => update({ density: density as AppearanceData["density"] })}
           />
         </Field>
-        <Field label="Motion">
+        <Field label={t.motion}>
           <Select
             value={appearance.motion}
             options={[
-              { label: "Full", value: "full" },
-              { label: "Reduced", value: "reduced" },
+              { label: t.options.full, value: "full" },
+              { label: t.options.reduced, value: "reduced" },
             ]}
             onChange={(motion) => update({ motion: motion as AppearanceData["motion"] })}
           />
@@ -1005,23 +1203,32 @@ export function AppearanceEditor({
   );
 }
 
-export function SeoEditor({ seo, updateSite }: { seo: SeoData; updateSite: UpdateSite }) {
+export function SeoEditor({
+  seo,
+  updateSite,
+  language,
+}: {
+  seo: SeoData;
+  updateSite: UpdateSite;
+  language: Language;
+}) {
+  const t = editorCopy[language];
   const update = (patch: Partial<SeoData>) =>
     updateSite((data) => ({ ...data, seo: { ...data.seo, ...patch } }));
 
   return (
-    <EditorBlock title="SEO and Metadata">
-      <Field label="Page title">
+    <EditorBlock title={t.seo}>
+      <Field label={t.pageTitle}>
         <TextInput value={seo.title} onChange={(title) => update({ title })} />
       </Field>
-      <Field label="Description">
+      <Field label={t.description}>
         <TextArea value={seo.description} onChange={(description) => update({ description })} />
       </Field>
       <div className="form-grid">
-        <Field label="Keywords">
+        <Field label={t.keywords}>
           <TextInput value={seo.keywords} onChange={(keywords) => update({ keywords })} />
         </Field>
-        <Field label="Open Graph image">
+        <Field label={t.openGraphImage}>
           <TextInput value={seo.ogImage} onChange={(ogImage) => update({ ogImage })} />
         </Field>
       </div>
@@ -1033,11 +1240,14 @@ export function DataEditor({
   data,
   onImport,
   onReset,
+  language,
 }: {
   data: SiteData;
   onImport: (data: SiteData) => void;
   onReset: () => void;
+  language: Language;
 }) {
+  const t = editorCopy[language];
   const [importError, setImportError] = useState("");
 
   const handleFile = (file: File | null) => {
@@ -1049,20 +1259,21 @@ export function DataEditor({
         onImport(parseSiteJson(String(reader.result)));
         setImportError("");
       } catch (error) {
-        setImportError(error instanceof Error ? error.message : "Import failed.");
+        const message = error instanceof Error ? error.message : t.importFailed;
+        setImportError(formatImportError(message, language));
       }
     };
     reader.readAsText(file);
   };
 
   return (
-    <EditorBlock title="Data">
+    <EditorBlock title={t.data}>
       <div className="data-actions">
         <Button variant="primary" onClick={() => downloadText("site-data.json", exportSiteData(data))}>
-          <Download size={15} /> Export JSON
+          <Download size={15} /> {t.exportJson}
         </Button>
         <label className="button button-ghost">
-          <Upload size={15} /> Import JSON
+          <Upload size={15} /> {t.importJson}
           <input
             className="file-input"
             type="file"
@@ -1071,7 +1282,7 @@ export function DataEditor({
           />
         </label>
         <Button variant="danger" onClick={onReset}>
-          <RotateCcw size={15} /> Reset
+          <RotateCcw size={15} /> {t.reset}
         </Button>
       </div>
       {importError ? (
@@ -1088,6 +1299,7 @@ function CollectionEditor<T extends { id: string; title?: string; role?: string 
   title,
   items,
   addLabel,
+  language,
   addItem,
   moveItemAt,
   deleteItem,
@@ -1096,11 +1308,14 @@ function CollectionEditor<T extends { id: string; title?: string; role?: string 
   title: string;
   items: T[];
   addLabel: string;
+  language: Language;
   addItem: () => void;
   moveItemAt: (index: number, direction: -1 | 1) => void;
   deleteItem: (id: string) => void;
   renderItem: (item: T) => JSX.Element;
 }) {
+  const t = editorCopy[language];
+
   return (
     <EditorBlock
       title={title}
@@ -1116,11 +1331,11 @@ function CollectionEditor<T extends { id: string; title?: string; role?: string 
             <div className="card-toolbar">
               <strong>{item.title ?? item.role ?? item.id}</strong>
               <div className="row-actions">
-                <Button onClick={() => moveItemAt(index, -1)}>Up</Button>
-                <Button onClick={() => moveItemAt(index, 1)}>Down</Button>
+                <Button onClick={() => moveItemAt(index, -1)}>{t.up}</Button>
+                <Button onClick={() => moveItemAt(index, 1)}>{t.down}</Button>
                 <Button
                   variant="danger"
-                  ariaLabel={`Delete ${item.title ?? item.role ?? item.id}`}
+                  ariaLabel={`${t.delete} ${item.title ?? item.role ?? item.id}`}
                   onClick={() => deleteItem(item.id)}
                 >
                   <Trash2 size={15} />
