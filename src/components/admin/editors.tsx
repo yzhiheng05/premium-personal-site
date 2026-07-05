@@ -83,6 +83,11 @@ const editorCopy = {
     importFailed: "Import failed.",
     englishContent: "English",
     chineseContent: "Chinese",
+    translateToChinese: "EN to Chinese",
+    translateToEnglish: "Chinese to EN",
+    translating: "Translating...",
+    translateEmpty: "Add source text first.",
+    translateFailed: "Translation failed. Please try again or edit manually.",
     translationCheck: "Translation Check",
     translationCheckBody: "Use the content tabs to edit English and Chinese side by side.",
     options: {
@@ -162,6 +167,11 @@ const editorCopy = {
     importFailed: "导入失败。",
     englishContent: "英文",
     chineseContent: "中文",
+    translateToChinese: "英译中",
+    translateToEnglish: "中译英",
+    translating: "正在翻译...",
+    translateEmpty: "请先填写要翻译的内容。",
+    translateFailed: "翻译失败，请稍后重试或手动编辑。",
     translationCheck: "翻译检查",
     translationCheckBody: "请在各内容页并排编辑英文和中文，这里只检查中文覆盖情况。",
     options: {
@@ -366,6 +376,37 @@ function chineseValue(data: SiteData, path: string): string {
   return data.translations?.zh[path] ?? "";
 }
 
+async function translateText(text: string, source: "en" | "zh-CN", target: "en" | "zh-CN") {
+  const params = new URLSearchParams({
+    client: "gtx",
+    sl: source,
+    tl: target,
+    dt: "t",
+    q: text,
+  });
+  const response = await fetch(`https://translate.googleapis.com/translate_a/single?${params.toString()}`);
+
+  if (!response.ok) {
+    throw new Error("Translation request failed.");
+  }
+
+  const payload = (await response.json()) as unknown;
+  if (!Array.isArray(payload) || !Array.isArray(payload[0])) {
+    throw new Error("Translation response was not valid.");
+  }
+
+  const translated = payload[0]
+    .map((segment) => (Array.isArray(segment) && typeof segment[0] === "string" ? segment[0] : ""))
+    .join("")
+    .trim();
+
+  if (!translated) {
+    throw new Error("Translation response was empty.");
+  }
+
+  return translated;
+}
+
 export function ProfileEditor({
   data,
   updateSite,
@@ -554,14 +595,68 @@ function BilingualField({
   area?: boolean;
 }) {
   const t = editorCopy[language];
+  const [translationState, setTranslationState] = useState<"idle" | "toChinese" | "toEnglish">("idle");
+  const [translationError, setTranslationError] = useState("");
   const updateEnglish = (next: string) =>
     updateSite((current) => updateEnglishValue(current, path, next));
   const updateChinese = (next: string) =>
     updateSite((current) => updateChineseValue(current, path, next));
+  const isTranslating = translationState !== "idle";
+
+  const translateBetweenFields = async (direction: "toChinese" | "toEnglish") => {
+    const sourceText = direction === "toChinese" ? sourceValue : translationValue;
+    const trimmed = sourceText.trim();
+
+    if (!trimmed) {
+      setTranslationError(t.translateEmpty);
+      return;
+    }
+
+    setTranslationState(direction);
+    setTranslationError("");
+
+    try {
+      const translated = await translateText(
+        trimmed,
+        direction === "toChinese" ? "en" : "zh-CN",
+        direction === "toChinese" ? "zh-CN" : "en",
+      );
+
+      if (direction === "toChinese") {
+        updateChinese(translated);
+      } else {
+        updateEnglish(translated);
+      }
+    } catch {
+      setTranslationError(t.translateFailed);
+    } finally {
+      setTranslationState("idle");
+    }
+  };
 
   return (
     <div className="translation-field">
-      <span>{label}</span>
+      <div className="translation-field-head">
+        <span>{label}</span>
+        <div className="translation-actions">
+          <Button
+            disabled={isTranslating}
+            onClick={() => {
+              void translateBetweenFields("toChinese");
+            }}
+          >
+            {translationState === "toChinese" ? t.translating : t.translateToChinese}
+          </Button>
+          <Button
+            disabled={isTranslating}
+            onClick={() => {
+              void translateBetweenFields("toEnglish");
+            }}
+          >
+            {translationState === "toEnglish" ? t.translating : t.translateToEnglish}
+          </Button>
+        </div>
+      </div>
       <div className="translation-pair">
         <Field label={t.englishContent}>
           {area ? (
@@ -578,6 +673,7 @@ function BilingualField({
           )}
         </Field>
       </div>
+      {translationError ? <p className="translation-error">{translationError}</p> : null}
     </div>
   );
 }

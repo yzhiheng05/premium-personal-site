@@ -990,9 +990,29 @@ h3 {
   margin-bottom: 14px;
 }
 
-.translation-field > span {
+.translation-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.translation-field-head > span {
   color: var(--text);
   font-size: 0.84rem;
+}
+
+.translation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.translation-actions .button {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 0.72rem;
 }
 
 .translation-pair {
@@ -1003,6 +1023,12 @@ h3 {
 
 .translation-pair .field {
   margin-bottom: 0;
+}
+
+.translation-error {
+  margin: 0;
+  color: #ffd5cf;
+  font-size: 0.82rem;
 }
 
 .field {
