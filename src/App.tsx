@@ -24,6 +24,7 @@ type AdminTab =
 
 export function App() {
   const [siteData, setSiteData] = useState<SiteData>(() => loadSiteData());
+  const [draftData, setDraftData] = useState<SiteData | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [password, setPassword] = useState("");
@@ -32,7 +33,10 @@ export function App() {
   const hiddenClickCount = useRef(0);
   const keyBuffer = useRef("");
   const language = normalizeLanguage(siteData.appearance.language);
+  const activeAdminData = draftData ?? siteData;
+  const adminLanguage = normalizeLanguage(activeAdminData.appearance.language);
   const displayData = useMemo(() => localizeSiteData(siteData, language), [siteData, language]);
+  const hasUnsavedDraft = draftData ? JSON.stringify(draftData) !== JSON.stringify(siteData) : false;
   const adminText = adminCopy[language];
 
   useEffect(() => {
@@ -67,8 +71,17 @@ export function App() {
     [siteData.appearance.accent],
   );
 
-  const updateSite = useCallback((updater: (data: SiteData) => SiteData) => {
-    setSiteData((current) => saveSiteData(updater(current)));
+  const updateDraft = useCallback((updater: (data: SiteData) => SiteData) => {
+    setDraftData((current) => updater(current ?? siteData));
+  }, [siteData]);
+
+  const saveDraft = useCallback(() => {
+    setDraftData((current) => {
+      if (!current) return current;
+      const saved = saveSiteData(current);
+      setSiteData(saved);
+      return saved;
+    });
   }, []);
 
   const setLanguage = useCallback((nextLanguage: Language) => {
@@ -101,6 +114,7 @@ export function App() {
       setLoginError("");
       setPassword("");
       setLoginOpen(false);
+      setDraftData(siteData);
       setAdminOpen(true);
       return;
     }
@@ -116,6 +130,7 @@ export function App() {
     setAdminOpen(false);
     setLoginOpen(false);
     setPassword("");
+    setDraftData(null);
   };
 
   return (
@@ -157,13 +172,17 @@ export function App() {
 
       {adminOpen ? (
         <AdminPanel
-          data={siteData}
-          language={language}
+          data={activeAdminData}
+          effectiveData={siteData}
+          language={adminLanguage}
           tab={activeTab}
           onTabChange={setActiveTab}
-          updateSite={updateSite}
-          onImport={(data) => setSiteData(saveSiteData(data))}
-          onReset={() => setSiteData(saveSiteData(cloneDefaultSite()))}
+          updateSite={updateDraft}
+          hasUnsavedChanges={hasUnsavedDraft}
+          onSave={saveDraft}
+          onDiscard={() => setDraftData(siteData)}
+          onImport={(data) => setDraftData(data)}
+          onReset={() => setDraftData(cloneDefaultSite())}
           onClose={closeAdmin}
           onLogout={logout}
         />

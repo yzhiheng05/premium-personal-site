@@ -1,7 +1,9 @@
+import type { CSSProperties } from "react";
 import { BarChart3, Eye, Lock, LogOut, Save, Settings2, X } from "lucide-react";
 import type { Language, SiteData } from "../../types";
-import { adminCopy, adminTabs } from "../../i18n";
+import { adminCopy, adminTabs, localizeSiteData, normalizeLanguage } from "../../i18n";
 import { Button } from "../ui";
+import { PublicSite } from "../public/PublicSite";
 import {
   AppearanceEditor,
   DataEditor,
@@ -50,10 +52,14 @@ const tabs: Tab[] = [
 
 interface AdminPanelProps {
   data: SiteData;
+  effectiveData: SiteData;
   language: Language;
   tab: Tab;
   onTabChange: (tab: Tab) => void;
   updateSite: (updater: (data: SiteData) => SiteData) => void;
+  hasUnsavedChanges: boolean;
+  onSave: () => void;
+  onDiscard: () => void;
   onImport: (data: SiteData) => void;
   onReset: () => void;
   onClose: () => void;
@@ -62,10 +68,14 @@ interface AdminPanelProps {
 
 export function AdminPanel({
   data,
+  effectiveData,
   language,
   tab,
   onTabChange,
   updateSite,
+  hasUnsavedChanges,
+  onSave,
+  onDiscard,
   onImport,
   onReset,
   onClose,
@@ -73,6 +83,11 @@ export function AdminPanel({
 }: AdminPanelProps) {
   const copy = adminCopy[language];
   const tabLabels = adminTabs[language];
+  const previewLanguage = normalizeLanguage(data.appearance.language);
+  const previewData = localizeSiteData(data, previewLanguage);
+  const previewStyle = {
+    "--accent": data.appearance.accent,
+  } as CSSProperties;
 
   return (
     <aside className="admin-panel" aria-label={copy.studio}>
@@ -113,10 +128,26 @@ export function AdminPanel({
             </p>
             <h2>{tabLabels[tab]}</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label={copy.closeAdmin}>
-            <X size={18} />
-          </button>
+          <div className="admin-save-cluster">
+            <div className={hasUnsavedChanges ? "save-status save-status-draft" : "save-status"}>
+              <strong>{hasUnsavedChanges ? copy.unsavedChanges : copy.savedAndLive}</strong>
+              <span>{hasUnsavedChanges ? copy.previewOnly : copy.localStorageSaved}</span>
+            </div>
+            <Button variant="primary" onClick={onSave} disabled={!hasUnsavedChanges}>
+              <Save size={15} /> {copy.saveApply}
+            </Button>
+            <Button onClick={onDiscard} disabled={!hasUnsavedChanges}>
+              {copy.discardDraft}
+            </Button>
+            <button className="icon-button" type="button" onClick={onClose} aria-label={copy.closeAdmin}>
+              <X size={18} />
+            </button>
+          </div>
         </header>
+        <div className="save-help">
+          <strong>{copy.storageLabel}</strong>
+          <span>{copy.storageHint}</span>
+        </div>
         {tab === "dashboard" ? <Dashboard data={data} language={language} /> : null}
         {tab === "profile" ? (
           <ProfileEditor data={data} updateSite={updateSite} language={language} />
@@ -147,6 +178,38 @@ export function AdminPanel({
           <DataEditor data={data} onImport={onImport} onReset={onReset} language={language} />
         ) : null}
       </div>
+      <aside className="admin-preview-pane" aria-label={copy.livePreview}>
+        <div className="admin-preview-head">
+          <div>
+            <strong>{copy.livePreview}</strong>
+            <span>{hasUnsavedChanges ? copy.previewDraft : copy.previewLive}</span>
+          </div>
+          <span>{previewLanguage === "zh" ? "中文" : "English"}</span>
+        </div>
+        <div
+          className={`admin-preview-frame app theme-${data.appearance.theme} density-${data.appearance.density} motion-${data.appearance.motion}`}
+          style={previewStyle}
+        >
+          <PublicSite
+            data={previewData}
+            language={previewLanguage}
+            onLanguageChange={(nextLanguage) =>
+              updateSite((current) => ({
+                ...current,
+                appearance: {
+                  ...current.appearance,
+                  language: nextLanguage,
+                },
+              }))
+            }
+            onHiddenAdminSignal={() => undefined}
+          />
+        </div>
+        <div className="admin-preview-foot">
+          <span>{copy.effectiveNow}</span>
+          <strong>{effectiveData.admin.lastSavedAt || copy.notSaved}</strong>
+        </div>
+      </aside>
     </aside>
   );
 }

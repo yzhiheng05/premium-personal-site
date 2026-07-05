@@ -30,6 +30,9 @@ Recent focus:
   - Type `admin` while on the page.
 - Admin password: `atelier`
 - Content persistence: browser `localStorage`.
+- Admin edits are draft-only until `保存并生效 / Save & apply` is clicked.
+- The admin header shows unsaved/saved-and-live status plus the localStorage save location.
+- Wide admin view includes a side preview that renders the current draft; the public site only changes after saving.
 - Data import/export: JSON.
 - No backend database.
 - No real server-side authentication.
@@ -64,6 +67,7 @@ Main files:
 
 - `src/components/admin/AdminPanel.tsx`
   - Adds the `translations` admin tab as a translation coverage/check view.
+  - Shows save/apply status, localStorage save guidance, discard draft, and side preview.
 
 - `src/components/admin/editors.tsx`
   - Contains bilingual field editors for language-specific content.
@@ -96,6 +100,14 @@ For long text such as personal evaluations, biographies, or blog summaries:
 - Translation is not automatic and does not force paired names or text to match.
 
 This keeps manual control as the source of truth while making first drafts faster. If the user later wants production-grade translation, replace the public browser call with a deliberate provider choice, backend proxy, cost handling, and review-before-save behavior.
+
+## Save And Preview Model
+
+The public site renders the last saved/effective `siteData`.
+
+When the admin console opens, `App.tsx` creates a separate draft copy. Editors mutate only this draft. The draft appears immediately in the admin side preview, but it does not write to `localStorage` or change the public site until the user clicks `保存并生效 / Save & apply`.
+
+Saving calls `saveSiteData()`, updates `admin.lastSavedAt`, writes to `localStorage`, and replaces the effective public data. `放弃草稿 / Discard draft` resets the draft back to the effective saved data.
 
 ## Commands
 
