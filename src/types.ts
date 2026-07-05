@@ -107,6 +107,10 @@ export interface AdminData {
   lastSavedAt: string;
 }
 
+export interface TranslationData {
+  zh: Record<string, string>;
+}
+
 export interface SiteData {
   profile: ProfileData;
   sections: SectionSetting[];
@@ -119,4 +123,5 @@ export interface SiteData {
   appearance: AppearanceData;
   seo: SeoData;
   admin: AdminData;
+  translations?: TranslationData;
 }

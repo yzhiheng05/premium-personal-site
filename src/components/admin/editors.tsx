@@ -131,6 +131,319 @@ export function SectionsEditor({
   );
 }
 
+export function TranslationEditor({
+  data,
+  updateSite,
+}: {
+  data: SiteData;
+  updateSite: UpdateSite;
+}) {
+  const updateTranslation = (path: string, value: string) =>
+    updateSite((current) => ({
+      ...current,
+      translations: {
+        zh: {
+          ...current.translations?.zh,
+          [path]: value,
+        },
+      },
+    }));
+
+  const valueFor = (path: string) => data.translations?.zh[path] ?? "";
+
+  return (
+    <div className="stack">
+      <EditorBlock title="个人资料中文">
+        <div className="form-grid">
+          <TranslationInput
+            label="姓名"
+            path="profile.name"
+            value={valueFor("profile.name")}
+            source={data.profile.name}
+            onChange={updateTranslation}
+          />
+          <TranslationInput
+            label="身份"
+            path="profile.role"
+            value={valueFor("profile.role")}
+            source={data.profile.role}
+            onChange={updateTranslation}
+          />
+          <TranslationInput
+            label="地点"
+            path="profile.location"
+            value={valueFor("profile.location")}
+            source={data.profile.location}
+            onChange={updateTranslation}
+          />
+          <TranslationInput
+            label="可合作状态"
+            path="profile.availability"
+            value={valueFor("profile.availability")}
+            source={data.profile.availability}
+            onChange={updateTranslation}
+          />
+        </div>
+        <TranslationInput
+          area
+          label="简介短句"
+          path="profile.tagline"
+          value={valueFor("profile.tagline")}
+          source={data.profile.tagline}
+          onChange={updateTranslation}
+        />
+        <TranslationInput
+          area
+          label="个人介绍"
+          path="profile.biography"
+          value={valueFor("profile.biography")}
+          source={data.profile.biography}
+          onChange={updateTranslation}
+        />
+      </EditorBlock>
+
+      <EditorBlock title="模块与链接中文">
+        <div className="form-grid">
+          {data.sections.map((section) => (
+            <TranslationInput
+              key={section.id}
+              label={`${section.title} 模块名`}
+              path={`sections.${section.id}.title`}
+              value={valueFor(`sections.${section.id}.title`)}
+              source={section.title}
+              onChange={updateTranslation}
+            />
+          ))}
+          {data.links.map((link) => (
+            <TranslationInput
+              key={link.id}
+              label={`${link.label} 链接名`}
+              path={`links.${link.id}.label`}
+              value={valueFor(`links.${link.id}.label`)}
+              source={link.label}
+              onChange={updateTranslation}
+            />
+          ))}
+        </div>
+      </EditorBlock>
+
+      <EditorBlock title="项目中文">
+        {data.projects.map((project) => (
+          <article className="edit-card" key={project.id}>
+            <div className="card-toolbar">
+              <strong>{project.title}</strong>
+            </div>
+            <div className="form-grid">
+              <TranslationInput
+                label="项目名"
+                path={`projects.${project.id}.title`}
+                value={valueFor(`projects.${project.id}.title`)}
+                source={project.title}
+                onChange={updateTranslation}
+              />
+              <TranslationInput
+                label="类别"
+                path={`projects.${project.id}.category`}
+                value={valueFor(`projects.${project.id}.category`)}
+                source={project.category}
+                onChange={updateTranslation}
+              />
+              <TranslationInput
+                label="状态"
+                path={`projects.${project.id}.status`}
+                value={valueFor(`projects.${project.id}.status`)}
+                source={project.status}
+                onChange={updateTranslation}
+              />
+            </div>
+            <TranslationInput
+              area
+              label="描述"
+              path={`projects.${project.id}.description`}
+              value={valueFor(`projects.${project.id}.description`)}
+              source={project.description}
+              onChange={updateTranslation}
+            />
+          </article>
+        ))}
+      </EditorBlock>
+
+      <EditorBlock title="经历中文">
+        {data.experience.map((item) => (
+          <article className="edit-card" key={item.id}>
+            <div className="card-toolbar">
+              <strong>{item.role}</strong>
+            </div>
+            <div className="form-grid">
+              <TranslationInput
+                label="机构"
+                path={`experience.${item.id}.organization`}
+                value={valueFor(`experience.${item.id}.organization`)}
+                source={item.organization}
+                onChange={updateTranslation}
+              />
+              <TranslationInput
+                label="职位"
+                path={`experience.${item.id}.role`}
+                value={valueFor(`experience.${item.id}.role`)}
+                source={item.role}
+                onChange={updateTranslation}
+              />
+              <TranslationInput
+                label="亮点，逗号分隔"
+                path={`experience.${item.id}.highlights`}
+                value={valueFor(`experience.${item.id}.highlights`)}
+                source={item.highlights.join(", ")}
+                onChange={updateTranslation}
+              />
+            </div>
+            <TranslationInput
+              area
+              label="描述"
+              path={`experience.${item.id}.description`}
+              value={valueFor(`experience.${item.id}.description`)}
+              source={item.description}
+              onChange={updateTranslation}
+            />
+          </article>
+        ))}
+      </EditorBlock>
+
+      <EditorBlock title="文章中文">
+        {data.writing.map((item) => (
+          <article className="edit-card" key={item.id}>
+            <div className="card-toolbar">
+              <strong>{item.title}</strong>
+            </div>
+            <div className="form-grid">
+              <TranslationInput
+                label="标题"
+                path={`writing.${item.id}.title`}
+                value={valueFor(`writing.${item.id}.title`)}
+                source={item.title}
+                onChange={updateTranslation}
+              />
+              <TranslationInput
+                label="标签"
+                path={`writing.${item.id}.tag`}
+                value={valueFor(`writing.${item.id}.tag`)}
+                source={item.tag}
+                onChange={updateTranslation}
+              />
+            </div>
+            <TranslationInput
+              area
+              label="摘要"
+              path={`writing.${item.id}.summary`}
+              value={valueFor(`writing.${item.id}.summary`)}
+              source={item.summary}
+              onChange={updateTranslation}
+            />
+          </article>
+        ))}
+      </EditorBlock>
+
+      <EditorBlock title="媒体与服务中文">
+        {data.media.map((item) => (
+          <article className="edit-card" key={item.id}>
+            <div className="card-toolbar">
+              <strong>{item.title}</strong>
+            </div>
+            <TranslationInput
+              label="标题"
+              path={`media.${item.id}.title`}
+              value={valueFor(`media.${item.id}.title`)}
+              source={item.title}
+              onChange={updateTranslation}
+            />
+            <TranslationInput
+              area
+              label="说明"
+              path={`media.${item.id}.caption`}
+              value={valueFor(`media.${item.id}.caption`)}
+              source={item.caption}
+              onChange={updateTranslation}
+            />
+          </article>
+        ))}
+        {data.services.map((service) => (
+          <article className="edit-card" key={service.id}>
+            <div className="card-toolbar">
+              <strong>{service.title}</strong>
+            </div>
+            <TranslationInput
+              label="服务名"
+              path={`services.${service.id}.title`}
+              value={valueFor(`services.${service.id}.title`)}
+              source={service.title}
+              onChange={updateTranslation}
+            />
+            <TranslationInput
+              area
+              label="服务描述"
+              path={`services.${service.id}.description`}
+              value={valueFor(`services.${service.id}.description`)}
+              source={service.description}
+              onChange={updateTranslation}
+            />
+          </article>
+        ))}
+      </EditorBlock>
+
+      <EditorBlock title="SEO 中文">
+        <TranslationInput
+          label="页面标题"
+          path="seo.title"
+          value={valueFor("seo.title")}
+          source={data.seo.title}
+          onChange={updateTranslation}
+        />
+        <TranslationInput
+          area
+          label="页面描述"
+          path="seo.description"
+          value={valueFor("seo.description")}
+          source={data.seo.description}
+          onChange={updateTranslation}
+        />
+        <TranslationInput
+          label="关键词"
+          path="seo.keywords"
+          value={valueFor("seo.keywords")}
+          source={data.seo.keywords}
+          onChange={updateTranslation}
+        />
+      </EditorBlock>
+    </div>
+  );
+}
+
+function TranslationInput({
+  label,
+  path,
+  value,
+  source,
+  onChange,
+  area = false,
+}: {
+  label: string;
+  path: string;
+  value: string;
+  source: string;
+  onChange: (path: string, value: string) => void;
+  area?: boolean;
+}) {
+  return (
+    <Field label={label} hint={`English: ${source}`}>
+      {area ? (
+        <TextArea value={value} onChange={(next) => onChange(path, next)} />
+      ) : (
+        <TextInput value={value} onChange={(next) => onChange(path, next)} />
+      )}
+    </Field>
+  );
+}
+
 export function ProjectsEditor({
   projects,
   updateSite,

@@ -18,6 +18,7 @@ type AdminTab =
   | "services"
   | "links"
   | "appearance"
+  | "translations"
   | "seo"
   | "data";
 

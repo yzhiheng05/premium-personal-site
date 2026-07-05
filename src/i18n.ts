@@ -101,6 +101,7 @@ export const adminTabs = {
     services: "Services",
     links: "Links",
     appearance: "Appearance",
+    translations: "Translations",
     seo: "SEO",
     data: "Data",
   },
@@ -115,129 +116,38 @@ export const adminTabs = {
     services: "服务",
     links: "链接",
     appearance: "外观",
+    translations: "中文内容",
     seo: "SEO",
     data: "数据",
   },
 } as const;
 
-const zhSite = {
-  profile: {
-    name: "林以澈",
-    role: "独立系统设计师",
-    tagline: "为创始人、研究团队与高信任服务设计安静、耐用、可管理的数字系统。",
-    biography:
-      "以澈的工作介于产品策略、界面系统与运营工具之间。实践重点是让复杂工作变得清晰、克制，并能被长期稳定地掌控。",
-    location: "纽约 / 远程",
-    availability: "选择性接受顾问与产品系统项目",
-  },
-  sections: {
-    hero: "首页",
-    about: "关于",
-    projects: "精选项目",
-    experience: "经历",
-    writing: "文章",
-    media: "媒体",
-    services: "服务",
-    contact: "联系",
-  },
-  links: {
-    "l-email": "邮件",
-    "l-linkedin": "LinkedIn",
-    "l-archive": "档案",
-  },
-  projects: {
-    "p-atelier-os": {
-      title: "Atelier OS",
-      category: "产品系统",
-      description: "为精品策略工作室打造的私有运营层，连接客户记忆、交付节奏与高层汇报。",
-      status: "已上线",
-    },
-    "p-civic-signal": {
-      title: "Civic Signal Room",
-      category: "研究界面",
-      description: "为政策研究者设计的指挥界面，用于追踪弱信号、来源可信度与决策备忘录。",
-      status: "试点",
-    },
-    "p-meridian": {
-      title: "Meridian Briefing",
-      category: "高层工具",
-      description: "将碎片化运营数据整理为单一、具编辑品质的每日决策视图。",
-      status: "私有",
-    },
-  },
-  experience: {
-    "e-independent": {
-      organization: "林以澈工作室",
-      role: "主理人",
-      description: "面向复杂产品系统、高层工作流与编辑型软件的独立实践。",
-      highlights: ["创始人顾问", "设计系统", "运营界面"],
-    },
-    "e-northline": {
-      organization: "Northline Labs",
-      role: "产品设计负责人",
-      description: "负责 AI 辅助研究产品的界面策略，服务分析师与运营团队。",
-      highlights: ["扩建设计团队", "发布研究控制台", "减少流程漂移"],
-    },
-    "e-studio": {
-      organization: "独立客户",
-      role: "系统顾问",
-      description: "为高信任团队设计决策工具、内部平台与服务蓝图。",
-      highlights: ["私有工具", "服务系统", "创始人策略"],
-    },
-  },
-  writing: {
-    "w-calm-tools": {
-      title: "高风险工作的安静工具",
-      summary: "为什么最好的运营软件更像一间私密房间，而不是一座控制塔。",
-      tag: "界面",
-    },
-    "w-memory": {
-      title: "设计组织记忆",
-      summary: "一个把重复决策转化为长期组织知识的实践模型。",
-      tag: "系统",
-    },
-  },
-  media: {
-    "m-hero": {
-      title: "工作室系统研究",
-      caption: "为个人作品集环境生成的视觉语言研究。",
-    },
-    "m-talk": {
-      title: "为高层注意力而设计",
-      caption: "关于专注、工作流形态与信任的私享沙龙分享。",
-    },
-    "m-press": {
-      title: "界面笔记",
-      caption: "关于安静工具与决策节奏的一次短访谈。",
-    },
-  },
-  services: {
-    "s-product": {
-      title: "产品系统",
-      description: "为复杂服务塑造产品界面、工作流与组件语言。",
-    },
-    "s-advisory": {
-      title: "创始人顾问",
-      description: "将模糊的产品方向转化为清晰的运营选择与执行节奏。",
-    },
-    "s-interface": {
-      title: "高层界面",
-      description: "为简报、决策、仪式与组织记忆创建高信号工具。",
-    },
-  },
-  seo: {
-    title: "林以澈 | 独立系统设计师",
-    description: "面向系统设计、产品策略与高信任数字工具的高级个人作品集。",
-    keywords: "系统设计, 产品策略, 作品集, 界面设计",
-  },
-};
-
-function keepEdits(current: string, original: string, translated: string): string {
-  return current === original ? translated : current;
-}
-
 export function normalizeLanguage(language: Language | undefined): Language {
   return language === "en" ? "en" : "zh";
+}
+
+function translationFor(
+  data: SiteData,
+  path: string,
+  current: string,
+  defaultEnglish?: string,
+): string {
+  const translated = data.translations?.zh[path];
+  if (!translated) return current;
+
+  const defaultTranslated = defaultSite.translations?.zh[path];
+  if (defaultTranslated && translated === defaultTranslated && defaultEnglish && current !== defaultEnglish) {
+    return current;
+  }
+
+  return translated;
+}
+
+function csvToList(value: string): string[] {
+  return value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 }
 
 export function localizeSiteData(data: SiteData, language: Language): SiteData {
@@ -247,108 +157,113 @@ export function localizeSiteData(data: SiteData, language: Language): SiteData {
     ...data,
     profile: {
       ...data.profile,
-      name: keepEdits(data.profile.name, defaultSite.profile.name, zhSite.profile.name),
-      role: keepEdits(data.profile.role, defaultSite.profile.role, zhSite.profile.role),
-      tagline: keepEdits(data.profile.tagline, defaultSite.profile.tagline, zhSite.profile.tagline),
-      biography: keepEdits(
+      name: translationFor(data, "profile.name", data.profile.name, defaultSite.profile.name),
+      role: translationFor(data, "profile.role", data.profile.role, defaultSite.profile.role),
+      tagline: translationFor(data, "profile.tagline", data.profile.tagline, defaultSite.profile.tagline),
+      biography: translationFor(
+        data,
+        "profile.biography",
         data.profile.biography,
         defaultSite.profile.biography,
-        zhSite.profile.biography,
       ),
-      location: keepEdits(data.profile.location, defaultSite.profile.location, zhSite.profile.location),
-      availability: keepEdits(
+      location: translationFor(data, "profile.location", data.profile.location, defaultSite.profile.location),
+      availability: translationFor(
+        data,
+        "profile.availability",
         data.profile.availability,
         defaultSite.profile.availability,
-        zhSite.profile.availability,
       ),
     },
     sections: data.sections.map((section) => {
       const original = defaultSite.sections.find((item) => item.id === section.id);
       return {
         ...section,
-        title: original
-          ? keepEdits(section.title, original.title, zhSite.sections[section.id])
-          : section.title,
+        title: translationFor(data, `sections.${section.id}.title`, section.title, original?.title),
       };
     }),
     links: data.links.map((link) => {
       const original = defaultSite.links.find((item) => item.id === link.id);
       return {
         ...link,
-        label:
-          original && link.id in zhSite.links
-            ? keepEdits(link.label, original.label, zhSite.links[link.id as keyof typeof zhSite.links])
-            : link.label,
+        label: translationFor(data, `links.${link.id}.label`, link.label, original?.label),
       };
     }),
     projects: data.projects.map((project) => {
       const original = defaultSite.projects.find((item) => item.id === project.id);
-      const translated = zhSite.projects[project.id as keyof typeof zhSite.projects];
-      return original && translated
-        ? {
-            ...project,
-            title: keepEdits(project.title, original.title, translated.title),
-            category: keepEdits(project.category, original.category, translated.category),
-            description: keepEdits(project.description, original.description, translated.description),
-            status: keepEdits(project.status, original.status, translated.status),
-          }
-        : project;
+      return {
+        ...project,
+        title: translationFor(data, `projects.${project.id}.title`, project.title, original?.title),
+        category: translationFor(data, `projects.${project.id}.category`, project.category, original?.category),
+        description: translationFor(
+          data,
+          `projects.${project.id}.description`,
+          project.description,
+          original?.description,
+        ),
+        status: translationFor(data, `projects.${project.id}.status`, project.status, original?.status),
+      };
     }),
     experience: data.experience.map((item) => {
       const original = defaultSite.experience.find((entry) => entry.id === item.id);
-      const translated = zhSite.experience[item.id as keyof typeof zhSite.experience];
-      return original && translated
-        ? {
-            ...item,
-            organization: keepEdits(item.organization, original.organization, translated.organization),
-            role: keepEdits(item.role, original.role, translated.role),
-            description: keepEdits(item.description, original.description, translated.description),
-            highlights:
-              item.highlights.join("|") === original.highlights.join("|")
-                ? translated.highlights
-                : item.highlights,
-          }
-        : item;
+      const highlights = translationFor(
+        data,
+        `experience.${item.id}.highlights`,
+        item.highlights.join(", "),
+        original?.highlights.join(", "),
+      );
+      return {
+        ...item,
+        organization: translationFor(
+          data,
+          `experience.${item.id}.organization`,
+          item.organization,
+          original?.organization,
+        ),
+        role: translationFor(data, `experience.${item.id}.role`, item.role, original?.role),
+        description: translationFor(
+          data,
+          `experience.${item.id}.description`,
+          item.description,
+          original?.description,
+        ),
+        highlights: csvToList(highlights),
+      };
     }),
     writing: data.writing.map((item) => {
       const original = defaultSite.writing.find((entry) => entry.id === item.id);
-      const translated = zhSite.writing[item.id as keyof typeof zhSite.writing];
-      return original && translated
-        ? {
-            ...item,
-            title: keepEdits(item.title, original.title, translated.title),
-            summary: keepEdits(item.summary, original.summary, translated.summary),
-            tag: keepEdits(item.tag, original.tag, translated.tag),
-          }
-        : item;
+      return {
+        ...item,
+        title: translationFor(data, `writing.${item.id}.title`, item.title, original?.title),
+        summary: translationFor(data, `writing.${item.id}.summary`, item.summary, original?.summary),
+        tag: translationFor(data, `writing.${item.id}.tag`, item.tag, original?.tag),
+      };
     }),
     media: data.media.map((item) => {
       const original = defaultSite.media.find((entry) => entry.id === item.id);
-      const translated = zhSite.media[item.id as keyof typeof zhSite.media];
-      return original && translated
-        ? {
-            ...item,
-            title: keepEdits(item.title, original.title, translated.title),
-            caption: keepEdits(item.caption, original.caption, translated.caption),
-          }
-        : item;
+      return {
+        ...item,
+        title: translationFor(data, `media.${item.id}.title`, item.title, original?.title),
+        caption: translationFor(data, `media.${item.id}.caption`, item.caption, original?.caption),
+      };
     }),
     services: data.services.map((service) => {
       const original = defaultSite.services.find((entry) => entry.id === service.id);
-      const translated = zhSite.services[service.id as keyof typeof zhSite.services];
-      return original && translated
-        ? {
-            ...service,
-            title: keepEdits(service.title, original.title, translated.title),
-            description: keepEdits(service.description, original.description, translated.description),
-          }
-        : service;
+      return {
+        ...service,
+        title: translationFor(data, `services.${service.id}.title`, service.title, original?.title),
+        description: translationFor(
+          data,
+          `services.${service.id}.description`,
+          service.description,
+          original?.description,
+        ),
+      };
     }),
     seo: {
       ...data.seo,
-      title: keepEdits(data.seo.title, defaultSite.seo.title, zhSite.seo.title),
-      description: keepEdits(data.seo.description, defaultSite.seo.description, zhSite.seo.description),
-      keywords: keepEdits(data.seo.keywords, defaultSite.seo.keywords, zhSite.seo.keywords),
+      title: translationFor(data, "seo.title", data.seo.title, defaultSite.seo.title),
+      description: translationFor(data, "seo.description", data.seo.description, defaultSite.seo.description),
+      keywords: translationFor(data, "seo.keywords", data.seo.keywords, defaultSite.seo.keywords),
     },
   };
 }

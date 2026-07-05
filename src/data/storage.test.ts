@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
+import { localizeSiteData } from "../i18n";
 import { defaultSite } from "./defaultSite";
 import {
   STORAGE_KEY,
@@ -51,6 +52,23 @@ describe("site storage", () => {
     const parsed = parseSiteJson(JSON.stringify(legacyData));
 
     expect(parsed.appearance.language).toBe("zh");
+    expect(parsed.translations?.zh["profile.name"]).toBe("林以澈");
+  });
+
+  it("keeps legacy custom text when no matching Chinese translation was written", () => {
+    const legacyData = cloneDefaultSite() as unknown as {
+      profile: { name: string };
+      appearance: Record<string, unknown>;
+      translations?: unknown;
+    };
+    legacyData.profile.name = "Custom Person";
+    delete legacyData.appearance.language;
+    delete legacyData.translations;
+
+    const parsed = parseSiteJson(JSON.stringify(legacyData));
+    const localized = localizeSiteData(parsed, "zh");
+
+    expect(localized.profile.name).toBe("Custom Person");
   });
 
   it("rejects invalid import JSON", () => {

@@ -13,6 +13,7 @@ import {
   SectionsEditor,
   SeoEditor,
   ServicesEditor,
+  TranslationEditor,
   WritingEditor,
 } from "./editors";
 
@@ -27,6 +28,7 @@ type Tab =
   | "services"
   | "links"
   | "appearance"
+  | "translations"
   | "seo"
   | "data";
 
@@ -41,6 +43,7 @@ const tabs: Tab[] = [
   "services",
   "links",
   "appearance",
+  "translations",
   "seo",
   "data",
 ];
@@ -128,6 +131,7 @@ export function AdminPanel({
         {tab === "appearance" ? (
           <AppearanceEditor appearance={data.appearance} updateSite={updateSite} language={language} />
         ) : null}
+        {tab === "translations" ? <TranslationEditor data={data} updateSite={updateSite} /> : null}
         {tab === "seo" ? <SeoEditor seo={data.seo} updateSite={updateSite} /> : null}
         {tab === "data" ? <DataEditor data={data} onImport={onImport} onReset={onReset} /> : null}
       </div>

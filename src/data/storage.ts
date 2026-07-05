@@ -16,6 +16,12 @@ function normalizeSiteData(data: SiteData): SiteData {
       ...data.appearance,
       language: normalizeLanguage(data.appearance.language),
     },
+    translations: {
+      zh: {
+        ...defaultSite.translations?.zh,
+        ...data.translations?.zh,
+      },
+    },
   };
 }
 
