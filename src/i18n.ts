@@ -23,6 +23,10 @@ export const publicCopy = {
     servicesHeading: "Focused engagements for teams with complicated work.",
     contactHeading: "Bring the shape of the work. I will bring the operating clarity.",
     languageLabel: "中文",
+    dossier: "Dossier",
+    currentFile: "Current file",
+    fieldIndex: "Field index",
+    archiveRecord: "Archive record",
   },
   zh: {
     contact: "联系",
@@ -45,6 +49,10 @@ export const publicCopy = {
     servicesHeading: "面向复杂团队的聚焦型合作。",
     contactHeading: "带来工作的轮廓，我负责让它变得清晰可执行。",
     languageLabel: "EN",
+    dossier: "档案",
+    currentFile: "当前档案",
+    fieldIndex: "字段索引",
+    archiveRecord: "档案记录",
   },
 } as const;
 

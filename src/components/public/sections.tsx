@@ -57,6 +57,18 @@ export function HeroSection({
       </div>
       <div className="hero-visual" aria-label="Studio visual">
         {profile.heroImageUrl ? <img src={profile.heroImageUrl} alt="" /> : null}
+        <div className="hero-grid" aria-hidden="true" />
+        <div className="hero-coordinate hero-coordinate-top" aria-hidden="true">
+          {copy.fieldIndex} / 01
+        </div>
+        <div className="hero-coordinate hero-coordinate-side" aria-hidden="true">
+          {copy.dossier} 2026
+        </div>
+        <div className="hero-dossier">
+          <span>{copy.currentFile}</span>
+          <strong>{profile.role}</strong>
+          <small>{profile.location}</small>
+        </div>
         <div className="hero-panel">
           <span>{copy.availability}</span>
           <strong>{profile.availability}</strong>
@@ -113,15 +125,18 @@ export function ProjectsSection({
         <h2>{copy.projectsHeading}</h2>
       </div>
       <div className="project-list">
-        {visible.map((project) => (
+        {visible.map((project, index) => (
           <article className={project.featured ? "project featured" : "project"} key={project.id}>
-            <div>
-              <span>{project.category}</span>
+            <div className="project-body">
+              <div className="project-meta">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <span>{project.category}</span>
+              </div>
               <h3>{project.title}</h3>
               <p>{project.description}</p>
             </div>
             <footer>
-              <span>{project.status}</span>
+              <span className="project-status">{project.status}</span>
               <span>{project.year}</span>
               {project.link ? (
                 <a href={project.link} aria-label={`${project.title} link`}>
@@ -214,11 +229,16 @@ export function MediaSection({ media, language }: { media: MediaItem[]; language
       <div className="media-grid">
         {media
           .filter((item) => item.visible)
-          .map((item) => (
-            <article className={`media-item media-${item.type}`} key={item.id}>
+          .map((item, index) => (
+            <article
+              className={`media-item media-${item.type}${index === 0 ? " media-primary" : ""}`}
+              key={item.id}
+            >
               {item.type === "image" && item.url ? <img src={item.url} alt="" /> : <Sparkles size={28} />}
               <div>
-                <span>{item.type}</span>
+                <span>
+                  {copy.archiveRecord} {String(index + 1).padStart(2, "0")} / {item.type}
+                </span>
                 <h3>{item.title}</h3>
                 <p>{item.caption}</p>
               </div>
